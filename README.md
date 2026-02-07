@@ -1,86 +1,75 @@
-# Introduction
+# React + TypeScript + Vite
 
-Este repositorio contiene el **frontend de GobDocs**.  
-Actualmente el proyecto se encuentra en fase de **setup inicial**, por lo que este README funciona como una **lista técnica de tareas pendientes** para dejar el entorno listo y estable.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
----
+Currently, two official plugins are available:
 
-# Technical To-Do List
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Setup inicial del proyecto
-- [ ] Inicializar el proyecto con **Vite**.
-- [ ] Definir framework principal (React).
-- [ ] Configurar TypeScript (si lo van a usar)
-- [ ] Estructurar carpetas base (`src`, `components`, `pages`, `services`, etc.).
-- [ ] Definir alias de paths (`@/components`, `@/services`, etc.).
+## React Compiler
 
-## Dependencias y tooling
-- [ ] Instalar y configurar ESLint.
-- [ ] Instalar y configurar Prettier.
-- [ ] Definir reglas de linting del equipo.
-- [ ] Configurar husky + lint-staged (pre-commit hooks).
-- [ ] Configurar formateo automático en save.
+The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
 
-## Variables de entorno
-- [ ] Definir variables de entorno requeridas.
-- [ ] Crear archivo `.env.example`.
-- [ ] Configurar `import.meta.env` (Vite).
-- [ ] Separar environments (`development`, `staging`, `production`).
+Note: This will impact Vite dev & build performances.
 
-## Docker
-- [ ] Crear `Dockerfile` para frontend.
-- [ ] Crear `docker-compose.yml` para entorno local.
-- [ ] Configurar hot-reload dentro del contenedor.
-- [ ] Documentar comandos Docker (`build`, `up`, `down`).
-- [ ] Verificar compatibilidad con backend dockerizado.
+## Expanding the ESLint configuration
 
-## Comunicación con backend
-- [ ] Definir cliente HTTP (Axios / Fetch wrapper).
-- [ ] Centralizar base URL por environment.
-- [ ] Manejo global de errores HTTP.
-- [ ] Manejo de estados de loading y errores.
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-## State management
-- [ ] Definir estrategia de estado global (Context, Zustand, Redux, etc.).
-- [ ] Separar estado de UI y estado de negocio.
-- [ ] Manejar sesión del usuario.
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-## Routing
-- [ ] Configurar sistema de rutas.
-- [ ] Rutas públicas vs privadas.
-- [ ] Guards de autenticación.
-- [ ] Layouts base (auth / dashboard).
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-## Estilos y UI
-- [ ] Definir sistema de estilos (Tailwind, CSS Modules, UI Kit).
-- [ ] Configurar tema global.
-- [ ] Componentes base reutilizables.
-- [ ] Soporte responsive.
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
 
-## Build y optimización
-- [ ] Configurar build de producción.
-- [ ] Optimizar bundle (code splitting).
-- [ ] Configurar variables de build.
-- [ ] Verificar build dentro de Docker.
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-## Testing
-- [ ] Configurar testing framework.
-- [ ] Tests unitarios básicos.
-- [ ] Tests de componentes.
-- [ ] Tests de integración simples.
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
----
-
-# Build and Test
-
-> Pendiente de configuración.  
-Esta sección se completará una vez finalizado el setup técnico.
-
----
-
-# Contribute
-
-Antes de contribuir, asegúrate de:
-- Seguir la estructura definida del proyecto.
-- Respetar reglas de linting y formato.
-- Mantener el proyecto dockerizable.
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
