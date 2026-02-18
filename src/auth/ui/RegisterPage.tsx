@@ -2,7 +2,7 @@ import './RegisterPage.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function RegisterPage(): JSX.Element {
+export default function RegisterPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     nombre: '',
