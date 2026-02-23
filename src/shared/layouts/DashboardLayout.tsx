@@ -18,8 +18,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
     <div className="min-h-screen bg-white flex flex-col relative overflow-x-hidden">
       
       {/* NAVBAR */}
-      <nav className="bg-gobdocs-primary text-white py-10 px-8  z-50 w-full relative">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <nav className="bg-gobdocs-primary text-white py-10 px-10  z-50 w-full relative">
+        <div className= "w-full flex justify-between items-center">
           
           <Link to="/portal" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
              <img src={logo} alt="GobDocs Logo" className="h-10 w-auto object-contain" />
@@ -96,18 +96,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       {/* CONTENIDO PRINCIPAL */}
       <main className="flex-1 w-full relative">
         {showBackButton && (
-          <div className="max-w-7xl mx-auto px-6 pt-6">
-            <button 
-              onClick={() => navigate(-1)} 
-              className="flex items-center gap-2 text-gray-500 hover:text-gobdocs-primary transition-colors font-medium"
-            >
-              <ArrowLeft size={20} />
-              <span>Volver</span>
-            </button>
-          </div>
+          <button
+            onClick={() => navigate(-1)}
+            className="absolute left-40 top-6 z-20 flex items-center gap-2 text-white hover:text-gray-400 transition-colors font-medium"
+          >
+            <ArrowLeft size={20} />
+            <span>Volver</span>
+          </button>
         )}
-        {children}
-      </main>
+
+        {/* si quieres dejar un poco de espacio general para el contenido */}
+        <div className="pt-0">
+          {children}
+        </div>
+      </main> 
 
       {/* FOOTER */}
       <footer className="bg-gobdocs-primary text-white py-6 px-8 text-xs mt-auto w-full">

@@ -28,7 +28,7 @@ export const MyDocumentsPage = () => {
       <div className="min-h-[80vh] flex flex-col">
         
         {/* --- HEADER AZUL --- */}
-        <div className="bg-[#1a2b5e] -mx-6 md:-mx-8 px-6 md:px-8 pt-12 pb-24 text-center relative shadow-xl">
+        <div className="bg-gradient-to-b from-gobdocs-primary to-gobdocs-secondaryblue -mx-6 md:-mx-8 px-6 md:px-8 pt-12 pb-24 text-center relative shadow-xl">
             <h1 className="text-3xl md:text-5xl font-bold text-white mb-8 tracking-tight">
               Elige los documentos a visualizar
             </h1>

@@ -9,8 +9,9 @@ export default {
       colors: {
         gobdocs: {
           primary: '#111840',   // El azul oscuro del botón y títulos
-          secondary: '#d94032', // El naranja/rojo de los puntos
-          bg: '#f8f9fa'         // El fondo gris claro
+          secondaryblue: '#013876', // El azul más claro del fondo del hero
+          secondary: '#E7422F', // El naranja/rojo de los puntos
+          bg: '#FFFFFF'         
         }
       }
     },

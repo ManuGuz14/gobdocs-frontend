@@ -8,17 +8,16 @@ export const DashboardPage = () => {
   return (
     <DashboardLayout>
       {/* SECCIÓN 1: HERO (Banner Principal - AZUL) */}
-      <div className="bg-gobdocs-primary -mx-6 md:-mx-8 px-6 md:px-16 pt-16 pb-0 text-white relative overflow-hidden shadow-2xl mb-0 min-h-[500px] flex items-center">
-        
+      <div className="bg-gradient-to-b from-gobdocs-primary to-gobdocs-secondaryblue -mx-6 md:-mx-8 px-6 md:px-16 pt-16 pb-0 text-gobdocs-bg relative overflow-hidden shadow-2xl mb-0 min-h-[500px] flex items-center">
         {/* Decoración Fondo */}
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
 
-        <div className="relative z-10 max-w-2xl pb-16">
+        <div className="relative left-[7%] max-w-2xl pb-16">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight tracking-tight">
             Solicita tus documentos <br/>
-            <span className="text-blue-300">más rápido que nunca</span>
+            <span className="text-gobdocs-bg">más rápido que nunca</span>
           </h1>
-          <p className="text-blue-100 text-lg mb-10 leading-relaxed max-w-lg">
+          <p className="text-gobdocs-bg text-lg mb-10 leading-relaxed max-w-lg">
             Nuestra plataforma centraliza el proceso para que puedas gestionar tus solicitudes en línea.
           </p>
           
@@ -59,10 +58,10 @@ export const DashboardPage = () => {
         
         {/* Texto Derecha */}
         <div className="p-12 md:p-16">
-           <h2 className="text-3xl md:text-5xl font-bold text-[#1a2b5e] mb-6 leading-tight">
-             Solicita tus documentos con nuestro <span className="text-blue-600">Chat IA</span>
+           <h2 className="text-3xl md:text-5xl font-bold text-gobdocs-secondaryblue mb-6 leading-tight">
+             Solicita tus documentos con nuestro <span className="text-gobdocs-secondaryblue">Chat IA</span>
            </h2>
-           <p className="text-gray-600 text-lg mb-10 leading-relaxed">
+           <p className="text-gobdocs-primary text-lg mb-10 leading-relaxed">
              Con nuestro chat inteligente, pedir documentos nunca fue tan fácil. Solo indícanos qué necesitas y el sistema te guiará paso a paso, resolviendo dudas, validando información y acelerando el trámite.
            </p>
            
