@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from '../modules/Auth/pages/LoginPage';
-import { RegisterPage } from '../modules/Auth/pages/RegisterPage';
+import { RegisterPage } from '../auth/ui/RegisterPage';
 import { DashboardPage } from '../modules/ciudadano/pages/DashboardPage';
 import { CreateSolicitudPage } from '../modules/ciudadano/pages/CreateSolicitudPage';
 import { ProfilePage } from '../modules/ciudadano/pages/ProfilePage';
@@ -11,7 +11,7 @@ import { MisSolicitudesPage } from '../modules/ciudadano/pages/MisSolicitudesPag
 export const AppRouter = () => {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/auth/login" replace />} />
+{/* <Route path="/" element={<Navigate to="/auth/login" replace />} />  */}
       
       {/* Rutas Públicas */}
       <Route path="/auth/login" element={<LoginPage />} />

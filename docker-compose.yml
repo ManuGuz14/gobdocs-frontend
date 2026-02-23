@@ -2,7 +2,10 @@ version: '3.8'
 services:
   frontend:
     container_name: gobdocs-frontend
-    build: .
+    build: 
+      context: .
+      args:
+        - VITE_REACT_APP_BACKEND=https://gobdocs-backend.up.railway.app
     ports:
       - "5173:80"
     volumes:
@@ -10,3 +13,4 @@ services:
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
+    platform: linux/arm64
