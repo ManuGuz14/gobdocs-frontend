@@ -58,10 +58,27 @@ export default function LoginPage() {
       </main>
 
       <footer className="login-footer">
-        <div className="footer-inner">
+        <div className="footer-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px' }}>
           <div>GobDocs RD @ 2025</div>
           <div>administracion@gobdocs.com</div>
           <div>809-785-9999</div>
+          
+          {/* El "Easter Egg" del Patito de Goma */}
+          <img 
+            src="/rubber-duck.png" /* Cambia esto por la ruta real de tu imagen en la carpeta public o assets */
+            alt="Acceso Operadores"
+            title="Registro de Operadores" /* El texto que sale al dejar el mouse encima */
+            className="duck-easter-egg"
+            style={{ 
+              width: '30px', 
+              height: '30px', 
+              cursor: 'pointer', 
+              transition: 'transform 0.2s ease-in-out' 
+            }}
+            onClick={() => navigate('/registro-operador')} 
+            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          />
         </div>
       </footer>
     </div>

@@ -1,141 +1,180 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; 
 import { toast } from 'react-toastify'; 
+
+// Importamos el AuthLayout, las imágenes y tus componentes de UI
+import { AuthLayout } from '../../shared/layouts/AuthLayout';
+import LoginGradientVector from '../../assets/Login/LoginGradientVector.png';
+import LoginGradientVector2 from '../../assets/Login/LoginGradientVector2.png';
+import { Input } from '../../shared/ui/Input';
+import { Button } from '../../shared/ui/Button';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
 
-  // Estado único para el formulario (más limpio)
-  const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
-    cedula: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
-
+  // 1. Estados para los campos del formulario de Ciudadano
+  const [nombre, setNombre] = useState('');
+  const [apellido, setApellido] = useState('');
+  const [cedula, setCedula] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // 2. Variable de entorno para tu backend
   const API_URL = import.meta.env.VITE_REACT_APP_BACKEND || 'https://gobdocs-backend.up.railway.app';
 
-  // Manejador de cambios genérico
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Detiene el refresco de inmediato
+    e.preventDefault();
 
-    const { nombre, apellido, cedula, email, password, confirmPassword } = formData;
-
-    // 1. VALIDACIÓN: Campos vacíos
-    if (Object.values(formData).some(field => field.trim() === '')) {
-      toast.warning('Todos los campos son obligatorios.');
+    // --- VALIDACIONES FRONTEND ---
+    if (!nombre || !apellido || !cedula || !email || !password || !confirmPassword) {
+      toast.warning('Por favor, completa todos los campos.');
       return;
     }
 
-    // 2. VALIDACIÓN: Formato de Email (Básico)
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast.error('Por favor, ingresa un correo electrónico válido.');
-      return;
-    }
-
-    // 3. VALIDACIÓN: Coincidencia de contraseñas
     if (password !== confirmPassword) {
-      toast.error('Las contraseñas no coinciden.');
+      toast.error('Las contraseñas no coinciden. Inténtalo de nuevo.');
       return;
     }
 
-    // 4. VALIDACIÓN: Longitud mínima
     if (password.length < 6) {
       toast.warning('La contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
-    setIsLoading(true); // Bloquear botón para evitar múltiples clics
+    setIsLoading(true);
 
+    // --- INTEGRACIÓN CON EL BACKEND ---
     try {
       const response = await fetch(`${API_URL}/usuarios/registro-ciudadano`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-          nombre,
-          apellido,
-          cedula,
-          email,
-          password,
+          nombre: nombre,
+          apellido: apellido,
+          cedula: cedula,
+          email: email,
+          password: password,
         }),
       });
 
-      const data = await response.json();
+      // Parseamos la respuesta
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        throw new Error('El servidor no devolvió un formato válido.');
+      }
 
       if (response.ok) {
-        toast.success('¡Registro exitoso! Redirigiendo...');
-        setTimeout(() => navigate('/auth/login'), 2000);
+        toast.success('¡Registro exitoso! Por favor, inicia sesión.');
+        setTimeout(() => {
+          navigate('/auth/login');
+        }, 2000);
       } else {
-        // Muestra el error específico del backend si existe
-        toast.error(data.detail || data.message || 'Error en el registro.');
+        toast.error(data.detail || data.message || 'Ocurrió un error al crear la cuenta.');
       }
+
     } catch (error) {
       console.error('Error en registro:', error);
-      toast.error('No se pudo conectar con el servidor.');
+      toast.error('Error de conexión con el servidor.');
     } finally {
-      setIsLoading(false); // Desbloquear botón
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
-        <h2 className="text-3xl font-bold text-center text-[#1a2b5e] mb-8">Crear Cuenta</h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <InputField label="Nombre" name="nombre" value={formData.nombre} onChange={handleChange} placeholder="Juan" />
-            <InputField label="Apellido" name="apellido" value={formData.apellido} onChange={handleChange} placeholder="Pérez" />
-          </div>
-
-          <InputField label="Cédula" name="cedula" value={formData.cedula} onChange={handleChange} placeholder="001-1234567-8" />
-          <InputField label="Correo electrónico" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="ejemplo@correo.com" />
-          <InputField label="Contraseña" name="password" type="password" value={formData.password} onChange={handleChange} placeholder="••••••••" />
-          <InputField label="Confirmar Contraseña" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} placeholder="••••••••" />
-          
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className={`w-full text-white py-3 rounded-xl font-semibold transition-colors mt-6 ${
-              isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#1a2b5e] hover:bg-blue-900'
-            }`}
-          >
-            {isLoading ? 'Registrando...' : 'Registrarse'}
-          </button>
-        </form>
-
-        <p className="text-center text-gray-600 mt-6">
-          ¿Ya tienes cuenta? <Link to="/auth/login" className="text-blue-600 font-medium hover:underline">Inicia sesión</Link>
+    <AuthLayout
+      title="Crear Cuenta en GobDocs RD"
+      decoration={
+        <>
+          <img
+            src={LoginGradientVector}
+            alt="Login gradient"
+            className="absolute left-[85%] -translate-x-1/2 top-[3rem] w-70 opacity-95 pointer-events-none -z-10" 
+          />
+          <img
+            src={LoginGradientVector2}
+            alt="Login gradient 2"
+            className="absolute left-[20%] -translate-x-1/2 top-[20rem] w-70 opacity-95 pointer-events-none -z-10" 
+          />
+        </>
+      }
+    >
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-semibold text-gobdocs-primary">Crear Cuenta</h2>
+        <p className="text-gray-500 text-sm mt-1">
+          Únete a GobDocs RD para gestionar tus documentos
         </p>
       </div>
-    </div>
+
+      <form onSubmit={handleSubmit}>
+        
+        {/* Usamos un grid para poner Nombre y Apellido en la misma línea y ahorrar espacio */}
+        <div className="grid grid-cols-2 gap-4">
+          <Input 
+            label="Nombre" 
+            placeholder="Juan" 
+            type="text"
+            value={nombre}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNombre(e.target.value)}
+          />
+          <Input 
+            label="Apellido" 
+            placeholder="Pérez" 
+            type="text"
+            value={apellido}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setApellido(e.target.value)}
+          />
+        </div>
+
+        <Input 
+          label="Cédula" 
+          placeholder="001-1234567-8" 
+          type="text"
+          value={cedula}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCedula(e.target.value)}
+        />
+
+        <Input 
+          label="Correo electrónico" 
+          placeholder="ejemplo@correo.com" 
+          type="email"
+          value={email}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+        />
+        
+        <Input 
+          label="Contraseña" 
+          placeholder="••••••••" 
+          type="password"
+          value={password}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+        />
+
+        <Input 
+          label="Confirmar Contraseña" 
+          placeholder="••••••••" 
+          type="password"
+          value={confirmPassword}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+        />
+
+        <div className="mt-8">
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? 'Registrando...' : 'Registrarse'}
+          </Button>
+        </div>
+
+        <div className="mt-6 text-center">
+            <Link to="/auth/login" className="text-sm text-gray-500 hover:text-gobdocs-primary underline">
+                ¿Ya tienes cuenta? Inicia sesión
+            </Link>
+        </div>
+      </form>
+    </AuthLayout>
   );
 };
-
-// Componente auxiliar para evitar repetir código de inputs
-const InputField = ({ label, name, type = "text", value, onChange, placeholder }: any) => (
-  <div>
-    <label className="block text-gray-700 font-medium mb-1">{label}</label>
-    <input 
-      type={type}
-      name={name}
-      value={value}
-      onChange={onChange}
-      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      placeholder={placeholder}
-      required
-    />
-  </div>
-);

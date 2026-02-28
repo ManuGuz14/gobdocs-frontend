@@ -1,5 +1,5 @@
 import { DashboardLayout } from '../../../shared/layouts/DashboardLayout';
-import { Search, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 export const MisSolicitudesPage = () => {
   return (

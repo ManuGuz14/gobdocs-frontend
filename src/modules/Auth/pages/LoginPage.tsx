@@ -1,27 +1,27 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; 
-import { toast } from 'react-toastify'; 
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { AuthLayout } from '../../../shared/layouts/AuthLayout';
 import LoginGradientVector from '../../../assets/Login/LoginGradientVector.png';
 import LoginGradientVector2 from '../../../assets/Login/LoginGradientVector2.png';
 import { Input } from '../../../shared/ui/Input';
 import { Button } from '../../../shared/ui/Button';
 
+// 1. IMPORTAMOS TU IMAGEN DEL PATITO DESDE ASSETS
+import RubberDuckie from '../../../assets/RubberDuckie.png';
+
 export const LoginPage = () => {
   const navigate = useNavigate();
 
-  // 1. Estados para los inputs y carga
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // 2. URL del Backend
   const API_URL = import.meta.env.VITE_REACT_APP_BACKEND || 'https://gobdocs-backend.up.railway.app';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // --- VALIDACIONES ---
     if (!email || !password) {
       toast.warning('Por favor, ingresa tu correo y contraseña.');
       return;
@@ -29,7 +29,6 @@ export const LoginPage = () => {
 
     setIsLoading(true);
 
-    // --- INTEGRACIÓN CON EL BACKEND ---
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
@@ -45,18 +44,20 @@ export const LoginPage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // 3. Guardar el token de seguridad y los datos del usuario en el navegador
         localStorage.setItem('token', data.access_token);
         localStorage.setItem('user', JSON.stringify(data.user));
-
-        // 4. Mensaje de éxito personalizado con el nombre del usuario (según tu Postman)
         toast.success(`¡Bienvenido de nuevo, ${data.user.nombre}!`);
 
-        // Redirección al portal
-        setTimeout(() => {
-          navigate('/portal');
-        }, 1500);
+        // Comprobar si el usuario es operador (por rol o id de institución)
+        const isOperator = data.user.rol === 'operador' || data.user.rol === 'OPERADOR' || data.user.institucionId || data.user.institucion_id;
 
+        setTimeout(() => {
+          if (isOperator) {
+            navigate('/landingbkoffice');
+          } else {
+            navigate('/portal');
+          }
+        }, 1500);
       } else {
         toast.error(data.detail || data.message || 'Correo o contraseña incorrectos.');
       }
@@ -76,12 +77,12 @@ export const LoginPage = () => {
           <img
             src={LoginGradientVector}
             alt="Login gradient"
-            className="absolute left-[85%] -translate-x-1/2 top-[3rem] w-70 opacity-95 pointer-events-none -z-10" 
+            className="absolute left-[85%] -translate-x-1/2 top-[3rem] w-70 opacity-95 pointer-events-none -z-10"
           />
           <img
             src={LoginGradientVector2}
             alt="Login gradient 2"
-            className="absolute left-[20%] -translate-x-1/2 top-[20rem] w-70 opacity-95 pointer-events-none -z-10" 
+            className="absolute left-[20%] -translate-x-1/2 top-[20rem] w-70 opacity-95 pointer-events-none -z-10"
           />
         </>
       }
@@ -94,19 +95,17 @@ export const LoginPage = () => {
       </div>
 
       <form onSubmit={handleSubmit}>
-        
-        {/* 5. Conectamos los Inputs a nuestros estados */}
-        <Input 
-          label="Correo electrónico" 
-          placeholder="ejemplo@correo.com" 
+        <Input
+          label="Correo electrónico"
+          placeholder="ejemplo@correo.com"
           type="email"
           value={email}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
         />
-        
-        <Input 
-          label="Contraseña" 
-          placeholder="••••••••" 
+
+        <Input
+          label="Contraseña"
+          placeholder="••••••••"
           type="password"
           value={password}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
@@ -118,17 +117,30 @@ export const LoginPage = () => {
           </a>
         </div>
 
-        {/* 6. Deshabilitar el botón mientras carga */}
         <Button type="submit" disabled={isLoading}>
           {isLoading ? 'Iniciando...' : 'Iniciar Sesión'}
         </Button>
 
         <div className="mt-6 text-center">
-            <Link to="/auth/register" className="text-sm text-gray-500 hover:text-gobdocs-primary underline">
-                Crea una cuenta nueva aquí
-            </Link>
+          <Link to="/auth/register" className="text-sm text-gray-500 hover:text-gobdocs-primary underline">
+            Crea una cuenta nueva aquí
+          </Link>
         </div>
       </form>
+
+      {/* --- EASTER EGG: EL PATITO DE GOMA RESCATADO --- */}
+      {/* Aumentamos el z-index a 9999, lo subimos a bottom-20 y le damos más opacidad inicial (40) */}
+      <div className="fixed bottom-20 right-10 z-[9999]">
+        <img
+          src={RubberDuckie}
+          alt="Portal de Operadores"
+          title="Acceso Administrativo"
+          className="w-12 h-12 opacity-40 cursor-pointer hover:opacity-100 hover:scale-125 transition-all duration-300 drop-shadow-xl"
+          onClick={() => navigate('/auth/pages/RegisterOperatorPage')} /* CORRECCIÓN: Esta es la ruta que pusiste en el AppRouter */
+        />
+      </div>
+      {/* ------------------------------------------------------------- */}
+
     </AuthLayout>
   );
 };
