@@ -2,7 +2,7 @@ import { User, ArrowLeft, PenLine } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../../shared/layouts/DashboardLayout';
 // Asegúrate de importar la imagen de fondo correctamente
-import Imagendefondo from '../../../assets/ImagendeFondo.png'; 
+import Imagendefondo from '../../../assets/Perfil/Geo-Background-Profile.png'; 
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
@@ -13,12 +13,12 @@ export const ProfilePage = () => {
       <div className="relative min-h-[85vh] flex items-center justify-center p-4">
         
         {/* --- CAPA 0: FONDO GEOMÉTRICO --- */}
-        <div className="absolute inset-0 w-full h-full pointer-events-none">
-           <img 
-             src={Imagendefondo} 
-             alt="Fondo decorativo" 
-             className="w-full h-full object-cover object-center" 
-           />
+        <div className="absolute bottom-0 right-0 w-[500px] opacity-40 pointer-events-none">
+          <img
+            src={Imagendefondo}
+            alt="Fondo decorativo"
+            className="w-full h-auto object-contain"
+          />
         </div>
 
         {/* --- CAPA 1: CONTENIDO --- */}

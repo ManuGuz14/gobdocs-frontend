@@ -2,7 +2,7 @@ import { Trash2, Download } from 'lucide-react';
 import { DashboardLayout } from '../../../shared/layouts/DashboardLayout';
 import { Input } from '../../../shared/ui/Input';
 import { Button } from '../../../shared/ui/Button';
-import Imagendefondo from '../../../assets/ImagendeFondo.png'; 
+import Imagendefondo from '../../../assets/Solicitud/Geo-Background.png'; 
 
 export const CreateSolicitudPage = () => {
   return (
@@ -14,12 +14,12 @@ export const CreateSolicitudPage = () => {
             Quitamos el z-index negativo. Al estar primero en el código, se pinta primero (al fondo).
             'pointer-events-none' asegura que no estorbe a los clics.
         */}
-        <div className="absolute inset-0 w-full h-full pointer-events-none">
-           <img 
-             src={Imagendefondo} 
-             alt="Fondo" 
-             className="w-full h-full object-cover object-center" 
-           />
+        <div className="absolute bottom-0 right-0 w-[1000px] opacity-40 pointer-events-none">
+          <img
+            src={Imagendefondo}
+            alt="Fondo decorativo"
+            className="w-full h-auto object-contain"
+          />
         </div>
 
         {/* --- CAPA 10: CONTENIDO --- 
