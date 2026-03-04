@@ -14,33 +14,33 @@ export const DashboardPage = () => {
 
         <div className="relative left-[7%] max-w-2xl pb-16">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight tracking-tight">
-            Solicita tus documentos <br/>
+            Solicita tus documentos <br />
             <span className="text-gobdocs-bg">más rápido que nunca</span>
           </h1>
           <p className="text-gobdocs-bg text-lg mb-10 leading-relaxed max-w-lg">
             Nuestra plataforma centraliza el proceso para que puedas gestionar tus solicitudes en línea.
           </p>
-          
+
           <div className="w-64 shadow-lg shadow-blue-900/50">
-            <Link to="/portal/solicitud">
-                <Button style={{ backgroundColor: 'white', color: '#1a2b5e', borderRadius: '15px' }}>
+            <Link to="/portal/solicitar">
+              <Button style={{ backgroundColor: 'white', color: '#1a2b5e', borderRadius: '15px' }}>
                 Solicita documentos aquí
-                </Button>
+              </Button>
             </Link>
           </div>
         </div>
 
         {/* IMAGEN DEL HOMBRE (TIGUERE PENSANDO) */}
         <div className="absolute right-[12%] bottom-0 h-[90%] w-[55%] hidden lg:block pointer-events-none">
-            <img 
-                src={tiguerepensando}
-                alt="Ejecutivo"
-                className="w-full h-full object-contain object-right-bottom" 
-                style={{ 
-                    maskImage: 'linear-gradient(to right, transparent 5%, black 40%)',
-                    WebkitMaskImage: 'linear-gradient(to right, transparent 5%, black 40%)' 
-                }}
-            />
+          <img
+            src={tiguerepensando}
+            alt="Ejecutivo"
+            className="w-full h-full object-contain object-right-bottom"
+            style={{
+              maskImage: 'linear-gradient(to right, transparent 5%, black 40%)',
+              WebkitMaskImage: 'linear-gradient(to right, transparent 5%, black 40%)'
+            }}
+          />
         </div>
       </div>
 
@@ -49,30 +49,30 @@ export const DashboardPage = () => {
         {/* Imagen Izquierda */}
         <div className="relative h-[500px] overflow-hidden pointer-events-none">
           <div className="absolute inset-0 bg-[#1a2b5e]/10 z-10"></div>
-            <img
-              src={tiguereholding}
-              alt="Consulta IA"
-              className="w-full h-full object-cover object-top"
-            />
+          <img
+            src={tiguereholding}
+            alt="Consulta IA"
+            className="w-full h-full object-cover object-top"
+          />
         </div>
-        
+
         {/* Texto Derecha */}
         <div className="p-12 md:p-16">
-           <h2 className="text-3xl md:text-5xl font-bold text-gobdocs-secondaryblue mb-6 leading-tight">
-             Solicita tus documentos con nuestro <span className="text-gobdocs-secondaryblue">Chat IA</span>
-           </h2>
-           <p className="text-gobdocs-primary text-lg mb-10 leading-relaxed">
-             Con nuestro chat inteligente, pedir documentos nunca fue tan fácil. Solo indícanos qué necesitas y el sistema te guiará paso a paso, resolviendo dudas, validando información y acelerando el trámite.
-           </p>
-           
-           <div className="w-64">
-             {/* CAMBIO: Link que envuelve el botón para ir a /portal/documentos */}
-             <Link to="/portal/documentos">
-               <Button style={{ borderRadius: '15px' }}>
-                 Ver tus documentos aqui
-               </Button>
-             </Link>
-           </div>
+          <h2 className="text-3xl md:text-5xl font-bold text-gobdocs-secondaryblue mb-6 leading-tight">
+            Solicita tus documentos con nuestro <span className="text-gobdocs-secondaryblue">Chat IA</span>
+          </h2>
+          <p className="text-gobdocs-primary text-lg mb-10 leading-relaxed">
+            Con nuestro chat inteligente, pedir documentos nunca fue tan fácil. Solo indícanos qué necesitas y el sistema te guiará paso a paso, resolviendo dudas, validando información y acelerando el trámite.
+          </p>
+
+          <div className="w-64">
+            {/* CAMBIO: Link que envuelve el botón para ir a /portal/documentos */}
+            <Link to="/portal/documentos">
+              <Button style={{ borderRadius: '15px' }}>
+                Ver tus documentos aqui
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
