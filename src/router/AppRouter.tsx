@@ -3,6 +3,7 @@ import { LoginPage } from '../modules/Auth/pages/LoginPage';
 import { RegisterPage } from '../auth/ui/RegisterPage';
 import { DashboardPage } from '../modules/ciudadano/pages/DashboardPage';
 import { CreateSolicitudPage } from '../modules/ciudadano/pages/CreateSolicitudPage';
+import { SolicitarDocumentosPage } from '../modules/ciudadano/pages/SolicitarDocumentosPage';
 import { ProfilePage } from '../modules/ciudadano/pages/ProfilePage';
 import { MyDocumentsPage } from '../modules/ciudadano/pages/MyDocumentsPage';
 import { MisSolicitudesPage } from '../modules/ciudadano/pages/MisSolicitudesPage';
@@ -21,6 +22,7 @@ export const AppRouter = () => {
 
       {/* Rutas Privadas (Módulo Ciudadano) */}
       <Route path="/portal" element={<DashboardPage />} />
+      <Route path="/portal/solicitar" element={<SolicitarDocumentosPage />} />
       <Route path="/portal/solicitud" element={<CreateSolicitudPage />} />
       <Route path="/portal/perfil" element={<ProfilePage />} />
       <Route path="/portal/documentos" element={<MyDocumentsPage />} />
