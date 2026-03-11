@@ -11,6 +11,7 @@ import { RegisterOperadorPage } from '../modules/Auth/pages/RegisterOperatorPage
 import { LandingBkOfficePage } from '../modules/BackOffice/LandingBkOfficePage';
 import { VerSolicitudBkOfficePage } from "../modules/BackOffice/VerSolicitudIndvBkOfficePage.tsx";
 import { VerAllSolicitudBkOfficePage } from "../modules/BackOffice/VerAllSolicitudBkOfficePage.tsx";
+import { PagoExitosoPage } from '../modules/ciudadano/pages/PagoExitosoPage.tsx';
 
 export const AppRouter = () => {
   return (
@@ -25,12 +26,13 @@ export const AppRouter = () => {
       {/* Rutas Privadas (Módulo Ciudadano) */}
       <Route path="/portal" element={<DashboardPage />} />
       <Route path="/portal/solicitar" element={<SolicitarDocumentosPage />} />
-      <Route path="/portal/solicitud" element={<CreateSolicitudPage />} />
+      <Route path="/portal/crear-solicitud/:tipoDocumentoId" element={<CreateSolicitudPage />} />
       <Route path="/portal/perfil" element={<ProfilePage />} />
       <Route path="/portal/documentos" element={<MyDocumentsPage />} />
       <Route path="/portal/solicitudes" element={<MisSolicitudesPage />} />
       <Route path="/backoffice/solicitud/69" element={<VerSolicitudBkOfficePage />} />
       <Route path="/backoffice/solicitudes" element={<VerAllSolicitudBkOfficePage />} />
+      <Route path="/portal/pago-exitoso" element={<PagoExitosoPage />} />
 
       <Route path="*" element={<div>404 - No encontrado</div>} />
     </Routes>
