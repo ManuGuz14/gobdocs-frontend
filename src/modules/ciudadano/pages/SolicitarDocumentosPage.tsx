@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 
 import { DashboardLayout } from "../../../shared/layouts/DashboardLayout";
+import Cedulaimage from "../../../assets/Docs/Cedulaimage.png";
+import Actadenac from "../../../assets/Docs/Actadenac.png";
 
 export const SolicitarDocumentosPage = () => {
 
@@ -84,6 +86,44 @@ export const SolicitarDocumentosPage = () => {
     doc?.Nombre?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const submitCartSolicitud = async () => {
+    const API_URL = import.meta.env.VITE_REACT_APP_BACKEND || "https://gobdocs-backend.up.railway.app";
+    const token = localStorage.getItem("token");
+
+    if (!cart.length) {
+      alert("No hay solicitudes en el carrito");
+      return;
+    }
+
+    const body = {
+      solicitudes: cart.map((item: any) => ({
+        Formulario_ID: item.Formulario_ID,
+        respuestas: item.formData
+      }))
+    };
+
+    try {
+      const res = await fetch(`${API_URL}/solicitudes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) throw new Error("Error en backend");
+
+      localStorage.removeItem("solicitudCarrito");
+      setCart([]);
+      setShowCartModal(false);
+      navigate("/portal/pago-exitoso");
+    } catch (error) {
+      console.error("❌ Error creando solicitud:", error);
+      alert("Error creando la solicitud");
+    }
+  };
+
   return (
 
     <DashboardLayout>
@@ -145,8 +185,16 @@ export const SolicitarDocumentosPage = () => {
                   className="min-w-[280px] w-[280px] bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] overflow-hidden flex-shrink-0 snap-center border border-gray-100 flex flex-col"
                 >
 
-                  <div className="bg-[#0f3a61] h-36 w-full flex items-center justify-center">
-                    <ImageIcon className="text-white w-10 h-10" />
+                  <div className="bg-gray-100 h-36 w-full flex items-center justify-center overflow-hidden">
+                    {doc.Nombre?.toLowerCase().includes("cédula") || doc.Nombre?.toLowerCase().includes("cedula") ? (
+                      <img src={Cedulaimage} alt="Cédula" className="w-full h-full object-cover" />
+                    ) : doc.Nombre?.toLowerCase().includes("acta") ? (
+                      <img src={Actadenac} alt="Acta" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="bg-[#0f3a61] h-full w-full flex items-center justify-center">
+                        <ImageIcon className="text-white w-10 h-10" />
+                      </div>
+                    )}
                   </div>
 
                   <div className="p-6 flex flex-col items-center flex-1 justify-between gap-6">
@@ -218,7 +266,7 @@ export const SolicitarDocumentosPage = () => {
 
             <div className="space-y-3">
 
-              {cart.map((doc, index) => (
+              {cart.map((_, index) => (
 
                 <div
                   key={index}
@@ -241,13 +289,7 @@ export const SolicitarDocumentosPage = () => {
               </button>
 
               <button
-                onClick={() => {
-
-                  localStorage.removeItem("solicitudCarrito");
-
-                  navigate("/portal/pago-exitoso");
-
-                }}
+                onClick={submitCartSolicitud}
                 className="bg-gobdocs-primary text-white px-6 py-2 rounded-lg"
               >
                 Terminar solicitud

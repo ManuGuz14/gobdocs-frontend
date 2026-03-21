@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; 
-import { toast } from 'react-toastify'; 
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 // Importamos el AuthLayout, las imágenes y tus componentes de UI
 import { AuthLayout } from '../../shared/layouts/AuthLayout';
@@ -33,6 +33,12 @@ export const RegisterPage = () => {
       return;
     }
 
+    const cedulaRegex = /^\d{3}-\d{7}-\d{1}$/;
+    if (!cedulaRegex.test(cedula)) {
+      toast.error('ingrese un numero de cedula valido');
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.error('Las contraseñas no coinciden. Inténtalo de nuevo.');
       return;
@@ -40,6 +46,14 @@ export const RegisterPage = () => {
 
     if (password.length < 6) {
       toast.warning('La contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
+
+    if (!hasUpperCase || !hasSpecialChar) {
+      toast.error('La contraseña debe contener al menos una letra mayúscula y un carácter especial.');
       return;
     }
 
@@ -94,12 +108,12 @@ export const RegisterPage = () => {
           <img
             src={LoginGradientVector}
             alt="Login gradient"
-            className="absolute left-[85%] -translate-x-1/2 top-[3rem] w-70 opacity-95 pointer-events-none -z-10" 
+            className="absolute left-[85%] -translate-x-1/2 top-[3rem] w-70 opacity-95 pointer-events-none -z-10"
           />
           <img
             src={LoginGradientVector2}
             alt="Login gradient 2"
-            className="absolute left-[20%] -translate-x-1/2 top-[20rem] w-70 opacity-95 pointer-events-none -z-10" 
+            className="absolute left-[20%] -translate-x-1/2 top-[20rem] w-70 opacity-95 pointer-events-none -z-10"
           />
         </>
       }
@@ -112,52 +126,52 @@ export const RegisterPage = () => {
       </div>
 
       <form onSubmit={handleSubmit}>
-        
+
         {/* Usamos un grid para poner Nombre y Apellido en la misma línea y ahorrar espacio */}
         <div className="grid grid-cols-2 gap-4">
-          <Input 
-            label="Nombre" 
-            placeholder="Juan" 
+          <Input
+            label="Nombre"
+            placeholder="Juan"
             type="text"
             value={nombre}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNombre(e.target.value)}
           />
-          <Input 
-            label="Apellido" 
-            placeholder="Pérez" 
+          <Input
+            label="Apellido"
+            placeholder="Pérez"
             type="text"
             value={apellido}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setApellido(e.target.value)}
           />
         </div>
 
-        <Input 
-          label="Cédula" 
-          placeholder="001-1234567-8" 
+        <Input
+          label="Cédula"
+          placeholder="001-1234567-8"
           type="text"
           value={cedula}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCedula(e.target.value)}
         />
 
-        <Input 
-          label="Correo electrónico" 
-          placeholder="ejemplo@correo.com" 
+        <Input
+          label="Correo electrónico"
+          placeholder="ejemplo@correo.com"
           type="email"
           value={email}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
         />
-        
-        <Input 
-          label="Contraseña" 
-          placeholder="••••••••" 
+
+        <Input
+          label="Contraseña"
+          placeholder="••••••••"
           type="password"
           value={password}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
         />
 
-        <Input 
-          label="Confirmar Contraseña" 
-          placeholder="••••••••" 
+        <Input
+          label="Confirmar Contraseña"
+          placeholder="••••••••"
           type="password"
           value={confirmPassword}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
@@ -170,9 +184,9 @@ export const RegisterPage = () => {
         </div>
 
         <div className="mt-6 text-center">
-            <Link to="/auth/login" className="text-sm text-gray-500 hover:text-gobdocs-primary underline">
-                ¿Ya tienes cuenta? Inicia sesión
-            </Link>
+          <Link to="/auth/login" className="text-sm text-gray-500 hover:text-gobdocs-primary underline">
+            ¿Ya tienes cuenta? Inicia sesión
+          </Link>
         </div>
       </form>
     </AuthLayout>

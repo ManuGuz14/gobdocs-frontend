@@ -70,7 +70,7 @@ export const CreateSolicitudPage = () => {
 
     const API_URL =
       import.meta.env.VITE_REACT_APP_BACKEND ||
-      "http://localhost:3000";
+      "https://gobdocs-backend.up.railway.app";
 
     const token = localStorage.getItem("token");
 
@@ -219,6 +219,7 @@ export const CreateSolicitudPage = () => {
                   return (
                     <Input
                       key={campo.name}
+                      label={campo.label}
                       placeholder={campo.label}
                       type={campo.type}
                       onChange={(e: any) =>
@@ -246,6 +247,7 @@ export const CreateSolicitudPage = () => {
                   );
                 }
 
+                return null;
               })}
 
             </div>
