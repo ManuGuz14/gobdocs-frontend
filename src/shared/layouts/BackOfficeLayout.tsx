@@ -14,10 +14,10 @@ export const BackofficeLayout: React.FC<BackofficeLayoutProps> = ({ children }) 
   const showBackButton = location.pathname !== "/backoffice";
 
   return (
-    <div className="min-h-screen bg-white flex flex-col relative overflow-x-hidden">
+    <div className="min-h-screen bg-white flex flex-col relative overflow-visible">
 
       {/* NAVBAR */}
-      <nav className="bg-gobdocs-primary text-white py-10 px-10 w-full relative">
+      <nav className="bg-gobdocs-primary text-white py-10 px-10 w-full relative overflow-visible">
 
         <div className="w-full flex justify-between items-center">
 
@@ -87,9 +87,10 @@ export const BackofficeLayout: React.FC<BackofficeLayoutProps> = ({ children }) 
                 <User size={20} />
               </div>
 
-              <div className="absolute right-0 top-full pt-2 w-48 invisible opacity-0 translate-y-2
-              group-hover:visible group-hover:opacity-100 group-hover:translate-y-0
-              transition-all duration-300">
+              {/* DROPDOWN FIXED */}
+              <div className="absolute right-0 top-14 w-48 invisible opacity-0 scale-95
+                group-hover:visible group-hover:opacity-100 group-hover:scale-100
+                transition-all duration-200 origin-top-right z-50">
 
                 <div className="bg-white rounded-xl shadow-xl py-2 border border-gray-100">
 

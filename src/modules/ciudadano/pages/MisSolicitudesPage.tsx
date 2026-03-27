@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from '../../../shared/layouts/DashboardLayout';
 import { Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const MisSolicitudesPage = () => {
   const [solicitudes, setSolicitudes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMisSolicitudes = async () => {
@@ -24,7 +27,6 @@ export const MisSolicitudesPage = () => {
 
         if (res.ok) {
           const data = await res.json();
-          // The response might be an array or wrapped in an object
           const dataArray = Array.isArray(data) ? data : data.solicitudes || [];
           setSolicitudes(dataArray);
         }
@@ -47,7 +49,8 @@ export const MisSolicitudesPage = () => {
   return (
     <DashboardLayout>
       <div className="min-h-[80vh] flex flex-col">
-        {/* --- HEADER AZUL --- */}
+
+        {/* HEADER */}
         <div className="bg-gradient-to-b from-gobdocs-primary to-gobdocs-secondaryblue -mx-6 md:-mx-8 px-6 md:px-8 pt-12 pb-24 text-center relative shadow-xl">
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-8 tracking-tight">
             Tus Solicitudes
@@ -77,23 +80,30 @@ export const MisSolicitudesPage = () => {
           ) : filteredSolicitudes.length > 0 ? (
             <div className="space-y-4">
               {filteredSolicitudes.map((item, index) => {
-                const id = item.Numero_Solicitud || item.Respuesta_ID || item.id || index;
-                // Parse date safely
-                const fecha = item.Fecha_Emision 
-                    ? new Date(item.Fecha_Emision).toLocaleDateString() 
-                    : "Fecha no disponible";
+                const id =
+                  item.Numero_Solicitud ||
+                  item.Respuesta_ID ||
+                  item.id ||
+                  index;
+
+                const fecha = item.Fecha_Emision
+                  ? new Date(item.Fecha_Emision).toLocaleDateString()
+                  : "Fecha no disponible";
 
                 return (
                   <div
                     key={id}
-                    className="bg-white border rounded-xl p-6 shadow-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 hover:shadow-md transition"
+                    onClick={() => navigate(`/portal/mi-solicitud/${id}`)}
+                    className="cursor-pointer bg-white border rounded-xl p-6 shadow-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 hover:shadow-md transition"
                   >
                     <div>
                       <h3 className="font-bold text-lg text-gobdocs-primary">
-                        Solicitud #{item.Numero_Solicitud || (index + 1)}
+                        Solicitud #{item.Numero_Solicitud || index + 1}
                       </h3>
-                      <p className="text-gray-500 text-sm mt-1">Fecha: {fecha}</p>
-                      
+                      <p className="text-gray-500 text-sm mt-1">
+                        Fecha: {fecha}
+                      </p>
+
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-3 uppercase tracking-wider ${
                           item.Estado === "APROBADA"
@@ -107,8 +117,14 @@ export const MisSolicitudesPage = () => {
                       </span>
                     </div>
 
-                    <div className="flex sm:flex-col gap-2">
-                      <button className="px-5 py-2 w-full bg-blue-50 text-blue-600 border border-blue-100 rounded-lg font-medium hover:bg-blue-100 transition">
+                    <div
+                      className="flex sm:flex-col gap-2"
+                      onClick={(e) => e.stopPropagation()} // 🔥 evita doble click trigger
+                    >
+                      <button
+                        onClick={() => navigate(`/portal/mi-solicitud/${id}`)}
+                        className="px-5 py-2 w-full bg-blue-50 text-blue-600 border border-blue-100 rounded-lg font-medium hover:bg-blue-100 transition"
+                      >
                         Ver detalles
                       </button>
                     </div>

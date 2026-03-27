@@ -14,6 +14,7 @@ import { VerAllSolicitudBkOfficePage } from "../modules/BackOffice/VerAllSolicit
 import { EmitirPage } from "../modules/BackOffice/EmitirPage.tsx";
 import { AprobarSolicitudPage } from "../modules/BackOffice/AprobarSolicitudPage.tsx";
 import { PagoExitosoPage } from '../modules/ciudadano/pages/PagoExitosoPage.tsx';
+import { SolicitudDetailPage } from '../modules/ciudadano/pages/MiSolicitudDetailPage';
 
 export const AppRouter = () => {
   return (
@@ -37,6 +38,8 @@ export const AppRouter = () => {
       <Route path="/backoffice/emitir" element={<EmitirPage />} />
       <Route path="/backoffice/aprobar/:id" element={<AprobarSolicitudPage />} />
       <Route path="/portal/pago-exitoso" element={<PagoExitosoPage />} />
+      <Route path="/portal/solicitudes" element={<MisSolicitudesPage />} />
+      <Route path="/portal/mi-solicitud/:id" element={<SolicitudDetailPage />} />
 
       <Route path="*" element={<div>404 - No encontrado</div>} />
     </Routes>
