@@ -11,6 +11,8 @@ import { RegisterOperadorPage } from '../modules/Auth/pages/RegisterOperatorPage
 import { LandingBkOfficePage } from '../modules/BackOffice/LandingBkOfficePage';
 import { VerSolicitudBkOfficePage } from "../modules/BackOffice/VerSolicitudIndvBkOfficePage.tsx";
 import { VerAllSolicitudBkOfficePage } from "../modules/BackOffice/VerAllSolicitudBkOfficePage.tsx";
+import { EmitirPage } from "../modules/BackOffice/EmitirPage.tsx";
+import { AprobarSolicitudPage } from "../modules/BackOffice/AprobarSolicitudPage.tsx";
 import { PagoExitosoPage } from '../modules/ciudadano/pages/PagoExitosoPage.tsx';
 
 export const AppRouter = () => {
@@ -30,8 +32,10 @@ export const AppRouter = () => {
       <Route path="/portal/perfil" element={<ProfilePage />} />
       <Route path="/portal/documentos" element={<MyDocumentsPage />} />
       <Route path="/portal/solicitudes" element={<MisSolicitudesPage />} />
-      <Route path="/backoffice/solicitud/69" element={<VerSolicitudBkOfficePage />} />
       <Route path="/backoffice/solicitudes" element={<VerAllSolicitudBkOfficePage />} />
+      <Route path="/backoffice/solicitud/:id" element={<VerSolicitudBkOfficePage />} />
+      <Route path="/backoffice/emitir" element={<EmitirPage />} />
+      <Route path="/backoffice/aprobar/:id" element={<AprobarSolicitudPage />} />
       <Route path="/portal/pago-exitoso" element={<PagoExitosoPage />} />
 
       <Route path="*" element={<div>404 - No encontrado</div>} />
