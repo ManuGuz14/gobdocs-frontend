@@ -169,13 +169,36 @@ export const RegisterPage = () => {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
         />
 
-        <Input
-          label="Confirmar Contraseña"
-          placeholder="••••••••"
-          type="password"
-          value={confirmPassword}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
-        />
+        <div>
+          <div className="mb-5">
+            <label className="block text-gobdocs-primary text-sm font-medium mb-2">
+              Confirmar Contraseña
+            </label>
+            <input
+              className={`w-full border rounded-lg px-4 py-3 text-gray-700 focus:outline-none focus:ring-2 transition-all ${
+                confirmPassword === ''
+                  ? 'border-blue-200 focus:ring-gobdocs-primary focus:border-transparent'
+                  : password === confirmPassword
+                    ? 'border-green-400 focus:ring-green-400 focus:border-transparent'
+                    : 'border-red-400 focus:ring-red-400 focus:border-transparent'
+              }`}
+              placeholder="••••••••"
+              type="password"
+              value={confirmPassword}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+            />
+            {confirmPassword !== '' && password !== confirmPassword && (
+              <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+                <span>⚠</span> Las contraseñas no coinciden
+              </p>
+            )}
+            {confirmPassword !== '' && password === confirmPassword && (
+              <p className="text-green-500 text-xs mt-1.5 flex items-center gap-1">
+                <span>✓</span> Las contraseñas coinciden
+              </p>
+            )}
+          </div>
+        </div>
 
         <div className="mt-8">
           <Button type="submit" disabled={isLoading}>
