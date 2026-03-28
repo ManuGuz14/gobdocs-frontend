@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, MoreHorizontal, Send, Sparkles, User } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { LoadingScreen } from './LoadingScreen';
 
 interface ChatWidgetProps {
   onClose: () => void;
@@ -20,10 +20,9 @@ const REQUEST_OPTIONS = [
 ];
 
 export const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
-  const navigate = useNavigate();
-
   const [selectedMainOption, setSelectedMainOption] = useState<string | null>(null);
   const [selectedRequestOption, setSelectedRequestOption] = useState<string | null>(null);
+  const [loadingTarget, setLoadingTarget] = useState<string | null>(null);
 
   // 👇 Ref para el auto-scroll
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -42,19 +41,30 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
     setSelectedRequestOption(null); // reset subopción cuando cambias la principal
 
     if (option === 'Visualizar documento') {
-      navigate('/portal/documentos');
-      onClose();
+      setLoadingTarget('/portal/documentos');
       return;
     }
 
     if (option === 'Visualizar solicitud') {
-      navigate('/portal/solicitudes');
-      onClose();
+      setLoadingTarget('/portal/solicitudes');
       return;
     }
 
     // Si es "Solicitar documento" no navegamos, solo mostramos el segundo menú
   };
+
+  // Show the loading screen overlay if a loading target is set
+  if (loadingTarget) {
+    return (
+      <LoadingScreen
+        targetRoute={loadingTarget}
+        onComplete={() => {
+          setLoadingTarget(null);
+          onClose();
+        }}
+      />
+    );
+  }
 
   const handleRequestOptionClick = (option: string) => {
     setSelectedRequestOption(option);
