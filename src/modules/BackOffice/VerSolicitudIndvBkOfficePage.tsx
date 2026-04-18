@@ -91,7 +91,7 @@ export const VerSolicitudBkOfficePage = () => {
 
       if (res.ok) {
         alert("Solicitud aprobada y documento emitido correctamente.");
-        navigate("/backoffice");
+        navigate("/landingbkoffice");
       } else {
         const err = await res.json();
         alert(`Error al aprobar: ${err.message || "Error desconocido"}`);
