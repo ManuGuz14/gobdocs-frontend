@@ -113,14 +113,12 @@ export const CreateSolicitudPage = () => {
       Formulario_ID: form.Formulario_ID,
       respuestas: formData,
       detalles: detalles,
-      tarifas: tarifas, // 🔥 FIX CLAVE (para el total)
-      nombre: form?.Nombre || `Documento ${tipoDocumentoId}`, // opcional
+      tarifas: tarifas,
+      nombre: form?.Nombre || `Documento ${tipoDocumentoId}`,
       TipoDocumento_ID: tipoDocumentoId,
     };
 
     const updatedCart = [...existingCart, newItem];
-
-    console.log("🛒 GUARDANDO EN CART:", updatedCart);
 
     localStorage.setItem("gobdocs_cart", JSON.stringify(updatedCart));
 
@@ -288,6 +286,20 @@ export const CreateSolicitudPage = () => {
           </Button>
         </div>
       </div>
+
+      {/* 🔥 LOADER FULLSCREEN */}
+      {submitting && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 shadow-xl flex flex-col items-center gap-4">
+            
+            <div className="w-12 h-12 border-4 border-gobdocs-primary border-t-transparent rounded-full animate-spin"></div>
+
+            <p className="text-gobdocs-primary font-semibold">
+              Procesando solicitud...
+            </p>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };
