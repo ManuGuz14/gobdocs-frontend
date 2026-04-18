@@ -11,6 +11,8 @@ import {
 import { DashboardLayout } from "../../../shared/layouts/DashboardLayout";
 import Cedulaimage from "../../../assets/Docs/Cedulaimage.png";
 import Actadenac from "../../../assets/Docs/Actadenac.png";
+import Licencia from "../../../assets/Docs/licenciadconducir.png";
+import BuenaConducta from "../../../assets/Docs/buenaconducta.jpg";
 
 export const SolicitarDocumentosPage = () => {
   const navigate = useNavigate();
@@ -24,7 +26,6 @@ export const SolicitarDocumentosPage = () => {
   const [cart, setCart] = useState<any[]>([]);
   const [showCartModal, setShowCartModal] = useState(false);
 
-  // 🔥 NUEVO: total del carrito
   const [total, setTotal] = useState(0);
 
   const scroll = (direction: "left" | "right") => {
@@ -32,6 +33,26 @@ export const SolicitarDocumentosPage = () => {
       const scrollAmount = direction === "left" ? -350 : 350;
       carouselRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
+  };
+
+  /* ------------------- 🔥 MAPEAR IMAGENES ------------------- */
+
+  const getImageForDoc = (nombre: string) => {
+    const name = nombre?.toLowerCase() || "";
+
+    if (name.includes("cédula") || name.includes("cedula"))
+      return Cedulaimage;
+
+    if (name.includes("acta"))
+      return Actadenac;
+
+    if (name.includes("licencia"))
+      return Licencia;
+
+    if (name.includes("certificado de no antecedentes penales"))
+      return BuenaConducta;
+
+    return null;
   };
 
   /* ------------------- FETCH DOCUMENT TYPES ------------------- */
@@ -72,7 +93,7 @@ export const SolicitarDocumentosPage = () => {
     setCart(storedCart);
   }, [location.key]);
 
-  /* ------------------- 🔥 CALCULAR TOTAL ------------------- */
+  /* ------------------- CALCULAR TOTAL ------------------- */
 
   useEffect(() => {
     let totalCalculado = 0;
@@ -174,7 +195,7 @@ export const SolicitarDocumentosPage = () => {
         </div>
 
         {/* DOCUMENT CAROUSEL */}
-        <div className="flex-1 w-full bg-white relative py-16 overflow-hidden">
+        <div className="flex-1 w-full bg-white relative py-16 overflow-hidden stagger">
           <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 relative">
 
             <div
@@ -186,31 +207,43 @@ export const SolicitarDocumentosPage = () => {
                   Cargando documentos...
                 </p>
               ) : (
-                filteredDocuments.map((doc) => (
-                  <div
-                    key={doc.TipoDocumento_ID}
-                    className="min-w-[280px] w-[280px] bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] overflow-hidden flex-shrink-0 snap-center border border-gray-100 flex flex-col"
-                  >
-                    <div className="bg-gray-100 h-36 w-full flex items-center justify-center overflow-hidden">
-                      <ImageIcon className="text-white w-10 h-10" />
-                    </div>
+                filteredDocuments.map((doc) => {
+                  const img = getImageForDoc(doc.Nombre);
 
-                    <div className="p-6 flex flex-col items-center flex-1 justify-between gap-6">
-                      <h3 className="text-[#0f3a61] font-bold text-lg text-center mt-2">
-                        {doc.Nombre}
-                      </h3>
+                  return (
+                    <div
+                      key={doc.TipoDocumento_ID}
+                      className="min-w-[280px] w-[280px] bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] overflow-hidden flex-shrink-0 snap-center border border-gray-100 flex flex-col"
+                    >
+                      <div className="bg-gray-100 h-36 w-full flex items-center justify-center overflow-hidden">
+                        {img ? (
+                          <img
+                            src={img}
+                            alt={doc.Nombre}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <ImageIcon className="text-gray-400 w-10 h-10" />
+                        )}
+                      </div>
 
-                      <button
-                        onClick={() =>
-                          navigate(`/portal/crear-solicitud/${doc.TipoDocumento_ID}`)
-                        }
-                        className="w-full bg-white text-[#0f3a61] border-2 border-[#0f3a61] py-2 px-4 rounded-xl font-semibold hover:bg-[#0f3a61] hover:text-white transition-all duration-300"
-                      >
-                        Solicitar
-                      </button>
+                      <div className="p-6 flex flex-col items-center flex-1 justify-between gap-6">
+                        <h3 className="text-[#0f3a61] font-bold text-lg text-center mt-2">
+                          {doc.Nombre}
+                        </h3>
+
+                        <button
+                          onClick={() =>
+                            navigate(`/portal/crear-solicitud/${doc.TipoDocumento_ID}`)
+                          }
+                          className="w-full bg-white text-[#0f3a61] border-2 border-[#0f3a61] py-2 px-4 rounded-xl font-semibold hover:bg-[#0f3a61] hover:text-white transition-all duration-300"
+                        >
+                          Solicitar
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
@@ -260,7 +293,6 @@ export const SolicitarDocumentosPage = () => {
               )}
             </div>
 
-            {/* 🔥 TOTAL AGREGADO */}
             <div className="mt-6 text-lg font-bold text-gobdocs-primary">
               Total a pagar: RD$ {total}
             </div>
