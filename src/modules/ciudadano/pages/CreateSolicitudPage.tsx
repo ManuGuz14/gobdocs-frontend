@@ -3,359 +3,291 @@ import { useParams, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "../../../shared/layouts/DashboardLayout";
 import { Input } from "../../../shared/ui/Input";
 import { Button } from "../../../shared/ui/Button";
-import Imagendefondo from "../../../assets/Solicitud/Geo-Background.png";
+
+type Tarifa = {
+  Tarifario_Codigo: number;
+  Nombre: string;
+  Descripcion: string;
+  Costo_Por_Servicio: number | string;
+};
 
 export const CreateSolicitudPage = () => {
-
   const { tipoDocumentoId } = useParams();
   const navigate = useNavigate();
 
+  const API_URL =
+    import.meta.env.VITE_REACT_APP_BACKEND ||
+    "https://gobdocs-backend.up.railway.app";
+
+  const token = localStorage.getItem("token");
+
   const [form, setForm] = useState<any>(null);
   const [formData, setFormData] = useState<any>({});
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [showAddAnotherModal, setShowAddAnotherModal] = useState(false);
+  const [tarifas, setTarifas] = useState<Tarifa[]>([]);
+  const [detalles, setDetalles] = useState<
+    { tarifarioId: number; cantidad: number }[]
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  /* ------------------ FETCH FORM ------------------ */
+  /* ------------------ FETCH FORM + TARIFAS ------------------ */
 
   useEffect(() => {
+    const fetchData = async () => {
+      if (!tipoDocumentoId) return;
 
-    const fetchForm = async () => {
+      setLoading(true);
 
-      const API_URL =
-        import.meta.env.VITE_REACT_APP_BACKEND ||
-        "https://gobdocs-backend.up.railway.app";
+      try {
+        const formRes = await fetch(
+          `${API_URL}/formularios/tipo-documento/${tipoDocumentoId}`
+        );
 
-      console.log("🔵 Fetching formulario para tipoDocumentoId:", tipoDocumentoId);
+        const formJson = await formRes.json();
+        setForm(formJson);
 
-      const res = await fetch(
-        `${API_URL}/formularios/tipo-documento/${tipoDocumentoId}`,
-        {
-          headers: {
-            "Content-Type": "application/json"
+        const tarifasRes = await fetch(
+          `${API_URL}/tarifarios/tipo-documento/${tipoDocumentoId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
+        );
+
+        const tarifasJson = await tarifasRes.json();
+
+        if (!Array.isArray(tarifasJson) || tarifasJson.length === 0) {
+          setTarifas([]);
+          setDetalles([]);
+        } else {
+          setTarifas(tarifasJson);
+
+          const detallesIniciales = tarifasJson.map((t: Tarifa) => ({
+            tarifarioId: t.Tarifario_Codigo,
+            cantidad: 1,
+          }));
+
+          setDetalles(detallesIniciales);
         }
-      );
-
-      const data = await res.json();
-
-      console.log("📥 Formulario recibido COMPLETO:", data);
-
-      // 🔥 IMPORTANTE: guardar TODO el objeto
-      setForm(data);
-
+      } catch (error) {
+        console.error(error);
+        alert("Error cargando formulario o tarifas");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (tipoDocumentoId) fetchForm();
-
+    fetchData();
   }, [tipoDocumentoId]);
 
   /* ------------------ HANDLE CHANGE ------------------ */
 
   const handleChange = (name: string, value: any) => {
-    setFormData((prev: any) => {
-      const updated = {
-        ...prev,
-        [name]: value
-      };
-
-      console.log("🟢 formData actualizado:", updated);
-
-      return updated;
-    });
+    setFormData((prev: any) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  /* ------------------ SUBMIT SOLICITUD ------------------ */
+  /* ------------------ 🛒 ADD TO CART ------------------ */
 
-  const submitSolicitud = async () => {
+  const handleAddToCart = () => {
+    if (!form?.Formulario_ID) return;
 
-    const API_URL =
-      import.meta.env.VITE_REACT_APP_BACKEND ||
-      "https://gobdocs-backend.up.railway.app";
-
-    const token = localStorage.getItem("token");
-
-    const carrito = JSON.parse(
-      localStorage.getItem("solicitudCarrito") || "[]"
-    );
-
-    console.log("🟡 Enviando solicitud...");
-    console.log("🛒 Carrito:", carrito);
-
-    if (!carrito.length) {
-      console.log("❌ Carrito vacío");
-      alert("No hay solicitudes en el carrito");
+    if (!formData || Object.keys(formData).length === 0) {
+      alert("Completa el formulario");
       return;
     }
 
-    const body = {
-      solicitudes: carrito.map((item: any) => ({
-        Formulario_ID: item.Formulario_ID,
-        respuestas: item.formData
-      }))
+    if (!detalles.length) {
+      alert("Este documento no tiene tarifas configuradas.");
+      return;
+    }
+
+    const existingCart = JSON.parse(
+      localStorage.getItem("gobdocs_cart") || "[]"
+    );
+
+    const newItem = {
+      Formulario_ID: form.Formulario_ID,
+      respuestas: formData,
+      detalles: detalles,
+      tarifas: tarifas, // 🔥 FIX CLAVE (para el total)
+      nombre: form?.Nombre || `Documento ${tipoDocumentoId}`, // opcional
+      TipoDocumento_ID: tipoDocumentoId,
     };
 
-    console.log("📦 BODY FINAL:", JSON.stringify(body));
+    const updatedCart = [...existingCart, newItem];
+
+    console.log("🛒 GUARDANDO EN CART:", updatedCart);
+
+    localStorage.setItem("gobdocs_cart", JSON.stringify(updatedCart));
+
+    navigate("/portal/solicitar", {
+      state: { refreshCart: true },
+    });
+  };
+
+  /* ------------------ 💳 GO TO PAYMENT ------------------ */
+
+  const handleGoToPayment = async () => {
+    if (!form?.Formulario_ID) {
+      alert("Formulario inválido");
+      return;
+    }
+
+    if (!formData || Object.keys(formData).length === 0) {
+      alert("Completa el formulario");
+      return;
+    }
+
+    if (!detalles.length) {
+      alert("Este documento no tiene tarifas configuradas.");
+      return;
+    }
+
+    const existingCart = JSON.parse(
+      localStorage.getItem("gobdocs_cart") || "[]"
+    );
+
+    const solicitudes = [
+      ...existingCart,
+      {
+        Formulario_ID: form.Formulario_ID,
+        respuestas: formData,
+        detalles: detalles,
+      },
+    ];
 
     try {
+      setSubmitting(true);
 
       const res = await fetch(`${API_URL}/solicitudes`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify({
+          solicitudes,
+        }),
       });
 
-      console.log("📡 STATUS:", res.status);
-
       const data = await res.json();
-      console.log("📥 RESPONSE:", data);
 
-      if (!res.ok) {
-        throw new Error("Error en backend");
-      }
+      if (!res.ok) throw new Error();
 
-      localStorage.removeItem("solicitudCarrito");
+      const numeroSolicitud = Array.isArray(data)
+        ? data[0]?.Numero_Solicitud
+        : data?.Numero_Solicitud;
 
-      setPaymentSuccess(true);
+      localStorage.removeItem("gobdocs_cart");
 
+      navigate(`/portal/pago/${numeroSolicitud}`);
     } catch (error) {
-      console.error("❌ Error creando solicitud:", error);
+      console.error(error);
       alert("Error creando la solicitud");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  /* ------------------ SUCCESS SCREEN ------------------ */
+  /* ------------------ UI ------------------ */
 
-  if (paymentSuccess) {
+  if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex justify-center items-center min-h-[80vh]">
-          <div className="bg-white rounded-2xl shadow-xl p-12 text-center max-w-lg">
-
-            <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center mx-auto mb-6">
-              <span className="text-white text-4xl">✓</span>
-            </div>
-
-            <h2 className="text-xl font-bold text-gobdocs-primary">
-              Tu Pago ha sido realizado exitosamente
-            </h2>
-
-            <p className="text-gray-500 mt-2">
-              Gracias por usar nuestros servicios
-            </p>
-
-            <div className="mt-6">
-              <Button onClick={() => navigate("/portal")}>
-                Volver al inicio
-              </Button>
-            </div>
-
-          </div>
+        <div className="flex justify-center items-center h-[70vh]">
+          <p>Cargando...</p>
         </div>
       </DashboardLayout>
     );
   }
 
-  /* ------------------ UI ------------------ */
-
   return (
-
     <DashboardLayout>
+      <div className="max-w-4xl mx-auto p-6">
+        <h1 className="text-2xl font-bold mb-6">
+          Crear Solicitud
+        </h1>
 
-      <div className="relative min-h-[85vh] flex items-center justify-center p-4 overflow-hidden">
+        <div className="space-y-4">
+          {form?.Form_Definition?.campos?.map((campo: any) => {
+            if (campo.type === "select") {
+              return (
+                <select
+                  key={campo.name}
+                  className="w-full border p-2 rounded"
+                  onChange={(e) =>
+                    handleChange(campo.name, e.target.value)
+                  }
+                >
+                  <option value="">Seleccione</option>
+                  {campo.options?.map((opt: string) => (
+                    <option key={opt}>{opt}</option>
+                  ))}
+                </select>
+              );
+            }
 
-        {/* Fondo */}
-        <div className="absolute bottom-0 right-0 w-[1000px] opacity-40 pointer-events-none">
-          <img
-            src={Imagendefondo}
-            alt="Fondo decorativo"
-            className="w-full h-auto object-contain"
-          />
+            return (
+              <Input
+                key={campo.name}
+                label={campo.label}
+                type={campo.type}
+                onChange={(e: any) =>
+                  handleChange(campo.name, e.target.value)
+                }
+              />
+            );
+          })}
         </div>
 
-        <div className="relative z-10 w-full max-w-6xl grid lg:grid-cols-12 gap-12 items-start">
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4">Tarifas</h2>
 
-          {/* IZQUIERDA */}
-          <div className="lg:col-span-5 space-y-10 pt-10">
-            <div>
-              <h2 className="text-3xl font-bold text-gobdocs-primary mb-6">
-                Requisitos
-              </h2>
-
-              <ul className="space-y-3 text-gray-600">
-                <li>• Documento de identidad vigente</li>
-                <li>• Formulario completado</li>
-                <li>• Pago de impuestos al día</li>
-                <li>• Documentos legalizados</li>
-              </ul>
-            </div>
-
-            <div>
-              <h2 className="text-3xl font-bold text-gobdocs-primary mb-6">
-                Recomendaciones
-              </h2>
-
-              <ul className="space-y-3 text-gray-600">
-                <li>• Escanear documentos a color</li>
-                <li>• Verificar la legibilidad</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* FORMULARIO */}
-          <div className="lg:col-span-7 bg-white rounded-3xl shadow-2xl p-10 border">
-
-            <h3 className="text-xl font-bold text-gobdocs-primary mb-6">
-              {form?.Form_Definition?.nombre}
-            </h3>
-
-            <div className="space-y-4">
-
-              {form?.Form_Definition?.campos?.map((campo: any) => {
-
-                if (campo.type === "text" || campo.type === "date") {
-                  return (
-                    <Input
-                      key={campo.name}
-                      label={campo.label}
-                      placeholder={campo.label}
-                      type={campo.type}
-                      onChange={(e: any) =>
-                        handleChange(campo.name, e.target.value)
-                      }
-                    />
-                  );
-                }
-
-                if (campo.type === "select") {
-                  return (
-                    <select
-                      key={campo.name}
-                      className="w-full border rounded-lg p-3"
-                      onChange={(e) =>
-                        handleChange(campo.name, e.target.value)
-                      }
-                    >
-                      <option>{campo.label}</option>
-
-                      {campo.options?.map((opt: string) => (
-                        <option key={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  );
-                }
-
-                return null;
-              })}
-
-            </div>
-
-            {/* BOTONES */}
-            <div className="flex gap-4 mt-8">
-
-              <Button
-                onClick={() => {
-
-                  console.log("🟠 Click en Proceder");
-                  console.log("FormData actual:", formData);
-                  console.log("Formulario actual:", form);
-
-                  if (!formData || Object.keys(formData).length === 0) {
-                    alert("Completa el formulario antes de continuar");
-                    return;
-                  }
-
-                  if (!form?.Formulario_ID) {
-                    console.error("❌ Formulario_ID no existe");
-                    alert("Error: no se encontró el ID del formulario");
-                    return;
-                  }
-
-                  const currentCart = JSON.parse(
-                    localStorage.getItem("solicitudCarrito") || "[]"
-                  );
-
-                  currentCart.push({
-                    Formulario_ID: form.Formulario_ID, // 🔥 clave
-                    formData
-                  });
-
-                  console.log("🛒 Nuevo carrito:", currentCart);
-
-                  localStorage.setItem(
-                    "solicitudCarrito",
-                    JSON.stringify(currentCart)
-                  );
-
-                  setShowAddAnotherModal(true);
-                }}
+          {tarifas.length > 0 ? (
+            tarifas.map((t) => (
+              <div
+                key={t.Tarifario_Codigo}
+                className="flex justify-between border p-3 rounded mb-2"
               >
-                Proceder
-              </Button>
-
-              <button
-                onClick={() => navigate("/portal/solicitar")}
-                className="bg-red-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-600"
-              >
-                Cancelar
-              </button>
-
-            </div>
-
-          </div>
-
+                <div>
+                  <p className="font-medium">{t.Nombre}</p>
+                  <p className="text-sm text-gray-500">
+                    {t.Descripcion}
+                  </p>
+                </div>
+                <p className="font-bold">
+                  RD$ {t.Costo_Por_Servicio}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="text-red-500">
+              ⚠️ Este documento no tiene tarifas configuradas
+            </p>
+          )}
         </div>
 
+        <div className="mt-6 space-y-3">
+          <Button
+            onClick={handleAddToCart}
+            className="w-full p-2 rounded-xl bg-gray-200 text-gray-800"
+          >
+            Agregar otro documento
+          </Button>
+
+          <Button
+            onClick={handleGoToPayment}
+            disabled={submitting}
+            className="w-full p-2 rounded-xl bg-gobdocs-primary text-white hover:bg-gobdocs-secondaryblue transition"
+          >
+            {submitting ? "Procesando..." : "Ir a pagar"}
+          </Button>
+        </div>
       </div>
-
-      {/* MODAL */}
-      {showAddAnotherModal && (
-
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
-
-            <h2 className="text-xl font-bold text-gobdocs-primary mb-4">
-              ¿Desea agregar otro documento a la solicitud?
-            </h2>
-
-            <div className="flex gap-4 justify-center mt-6">
-
-              <Button
-                onClick={() => {
-                  console.log("🟢 Usuario quiere agregar otro documento");
-                  setShowAddAnotherModal(false);
-                  navigate("/portal/solicitar");
-                }}
-              >
-                Sí, agregar otro
-              </Button>
-
-              <button
-                onClick={async () => {
-
-                  console.log("🔴 Usuario terminó → enviando solicitud");
-
-                  setShowAddAnotherModal(false);
-
-                  await submitSolicitud();
-
-                }}
-                className="bg-red-500 text-white px-6 py-2 rounded-lg font-semibold"
-              >
-                No
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      )}
-
     </DashboardLayout>
   );
 };
