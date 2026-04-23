@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { BackofficeLayout } from "../../shared/layouts/BackOfficeLayout";
 import { UserCircle2, IdCard, FileText, BadgeCheck } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ImageDeFondo from "../../assets/ImagendeFondo.png";
 
 export const AprobarSolicitudPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [solicitud, setSolicitud] = useState<any>(null);
   const [loading, setLoading] = useState(true);
