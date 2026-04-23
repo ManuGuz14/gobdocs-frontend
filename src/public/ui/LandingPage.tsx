@@ -19,9 +19,9 @@ function DropdownAccount() {
 
   return (
     <div className={`dropdown-account ${isOpen ? 'open' : ''}`} data-name="DropDownAccount" data-node-id="64:737">
-      <button 
-        className="dropdown-toggle" 
-        data-name="Vector" 
+      <button
+        className="dropdown-toggle"
+        data-name="Vector"
         data-node-id="I64:737;64:713"
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -66,6 +66,7 @@ function DropdownAccount() {
 }
 
 function NavUser({ className }: NavUserProps) {
+  const navigate = useNavigate();
   return (
     <div className={className || "nav-user-container"} data-name="Nav User" data-node-id="64:1045">
       <div className="nav-wrapper" data-name="Nav" data-node-id="64:1044">
@@ -76,7 +77,7 @@ function NavUser({ className }: NavUserProps) {
         <p className="nav-link" data-node-id="I64:1044;5:9">
           Visualizar
         </p>
-        <p className="nav-link" data-node-id="I64:1044;5:12">
+        <p className="nav-link" data-node-id="I64:1044;5:12" onClick={() => navigate('/portal/solicitar')}>
           Solicitar
         </p>
         <div className="nav-arrow" data-node-id="I64:1044;5:16">
@@ -113,13 +114,14 @@ function Footer({ className }: FooterProps) {
 }
 
 export default function LandingUsuario() {
+  const navigate = useNavigate();
   return (
     <div className="landing-container" data-name="Landing - Usuario" data-node-id="5:3">
       <Footer className="footer" />
-      
+
       {/* Hero Section Background */}
       <div className="hero-gradient" data-node-id="5:27" />
-      
+
       {/* Hero Section Left Content */}
       <div className="hero-section-left">
         <h1 className="hero-title" data-node-id="5:28">
@@ -129,16 +131,16 @@ export default function LandingUsuario() {
         <p className="hero-description" data-node-id="5:29">
           Solicita certificados, constancias y documentos oficiales de forma rápida y sin complicaciones. Nuestra plataforma centraliza el proceso para que puedas gestionar tus solicitudes en línea, ahorrar tiempo y dar seguimiento en tiempo real, todo desde un solo lugar y sin filas innecesarias.
         </p>
-        <a href="#" className="cta-button cta-button-light" data-node-id="5:32">
+        <a href="#" className="cta-button cta-button-light" data-node-id="5:32" onClick={(e) => { e.preventDefault(); navigate('/portal/solicitar'); }}>
           <span>Solicita documentos aqui</span>
         </a>
       </div>
-      
+
       {/* Hero Section Right Image */}
       <div className="hero-image-right" data-name="hombre-revisando-doc2 1" data-node-id="13:10">
         <img alt="Hombre revisando documentos" className="hero-image" src={imgHombreRevisandoDoc21} />
       </div>
-      
+
       {/* AI Chat Section */}
       <div className="ai-section">
         <h2 className="ai-title" data-node-id="13:11">
@@ -152,22 +154,22 @@ export default function LandingUsuario() {
           <span>Ver tus documentos aqui</span>
         </a>
       </div>
-      
+
       {/* AI Section Left Image */}
       <div className="ai-image-left" data-name="mujer-de-negocios-con-carpeta 1" data-node-id="14:18">
         <img alt="Mujer de negocios con carpeta" className="ai-image" src={imgMujerDeNegociosConCarpeta1} />
       </div>
-      
+
       {/* Chat Icon */}
       <div className="chat-icon-wrapper" data-node-id="14:23">
         <a href="#" className="chat-icon" data-name="comment-dots-regular-full 1">
           <img alt="Chat Icon" className="chat-icon-image" src={imgCommentDotsRegularFull1} />
         </a>
       </div>
-      
+
       {/* User Profile Dropdown */}
       {/* <div className="user-dropdown" data-name="DropDownUser/Inactive" data-node-id="64:708" /> */}
-      
+
       {/* Navigation */}
       <NavUser className="nav-user" />
     </div>

@@ -49,6 +49,12 @@ export const RegisterOperadorPage = () => {
       return;
     }
 
+    const cedulaRegex = /^\d{3}-\d{7}-\d{1}$/;
+    if (!cedulaRegex.test(cedula)) {
+      toast.error('ingrese un número de cédula válido');
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.error('Las contraseñas no coinciden.');
       return;
@@ -56,6 +62,14 @@ export const RegisterOperadorPage = () => {
 
     if (password.length < 6) {
       toast.warning('La contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
+
+    if (!hasUpperCase || !hasSpecialChar) {
+      toast.error('La contraseña debe contener al menos una letra mayúscula y un carácter especial.');
       return;
     }
 

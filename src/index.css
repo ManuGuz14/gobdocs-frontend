@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 * {
   margin: 0;
   padding: 0;
@@ -66,5 +67,68 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
 
+/* ========================= */
+/* 🔥 PAGE ENTER (MODERNO) */
+/* ========================= */
+
+.page-enter {
+  animation: pageEnter 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes pageEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.995);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* ========================= */
+/* 🔥 BACK SLIDE (VOLVER) */
+/* ========================= */
+
+.page-back {
+  animation: slideBack 0.3s ease forwards;
+}
+
+@keyframes slideBack {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+}
+
+/* ========================= */
+/* 🔥 STAGGER (ARMADO MODERNO) */
+/* ========================= */
+
+.stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.5s ease forwards;
+}
+
+.stagger > *:nth-child(1) { animation-delay: 0.08s; }
+.stagger > *:nth-child(2) { animation-delay: 0.16s; }
+.stagger > *:nth-child(3) { animation-delay: 0.24s; }
+.stagger > *:nth-child(4) { animation-delay: 0.32s; }
+.stagger > *:nth-child(5) { animation-delay: 0.40s; }
+.stagger > *:nth-child(6) { animation-delay: 0.48s; }
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
