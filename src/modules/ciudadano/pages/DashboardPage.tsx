@@ -138,11 +138,12 @@ export const DashboardPage = () => {
             Nuestro sistema te guía automáticamente para completar tu solicitud correctamente.
           </p>
 
-          <Link to="/portal/solicitar">
-            <Button style={{ borderRadius: '999px', padding: '12px 26px' }}>
-              Probar ahora
-            </Button>
-          </Link>
+          <Button
+            onClick={() => window.dispatchEvent(new Event('open-chat'))}
+            style={{ borderRadius: '999px', padding: '12px 26px' }}
+          >
+            Probar ahora
+          </Button>
         </div>
       </div>
 

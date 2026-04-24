@@ -59,6 +59,28 @@ export const RegisterPage = () => {
 
     setIsLoading(true);
 
+    // --- VERIFICAR SI EL CORREO YA EXISTE ---
+    try {
+      const emailCheckRes = await fetch(`${API_URL}/usuarios/verificar-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (emailCheckRes.ok) {
+        const emailCheckData = await emailCheckRes.json();
+        if (emailCheckData.existe || emailCheckData.exists) {
+          toast.error('Este correo electrónico ya está registrado. Intenta iniciar sesión.');
+          setIsLoading(false);
+          return;
+        }
+      }
+    } catch (emailCheckError) {
+      // Si el endpoint no existe o falla, continuamos con el registro normal
+      // El backend manejará duplicados en ese caso
+      console.warn('No se pudo verificar el correo previamente:', emailCheckError);
+    }
+
     // --- INTEGRACIÓN CON EL BACKEND ---
     try {
       const response = await fetch(`${API_URL}/usuarios/registro-ciudadano`, {
@@ -89,7 +111,20 @@ export const RegisterPage = () => {
           navigate('/auth/login');
         }, 2000);
       } else {
-        toast.error(data.detail || data.message || 'Ocurrió un error al crear la cuenta.');
+        // Detectar error de correo duplicado en la respuesta del backend
+        const errorMsg = (data.detail || data.message || '').toLowerCase();
+        if (
+          errorMsg.includes('email') ||
+          errorMsg.includes('correo') ||
+          errorMsg.includes('duplicate') ||
+          errorMsg.includes('already') ||
+          errorMsg.includes('existe') ||
+          errorMsg.includes('registrado')
+        ) {
+          toast.error('Este correo electrónico ya está registrado. Intenta iniciar sesión.');
+        } else {
+          toast.error(data.detail || data.message || 'Ocurrió un error al crear la cuenta.');
+        }
       }
 
     } catch (error) {

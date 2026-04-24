@@ -1,11 +1,13 @@
 import { useRef, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 import {
   Search,
   ChevronLeft,
   ChevronRight,
   Image as ImageIcon,
-  ShoppingCart
+  ShoppingCart,
+  AlertCircle
 } from "lucide-react";
 
 import { DashboardLayout } from "../../../shared/layouts/DashboardLayout";
@@ -27,6 +29,9 @@ export const SolicitarDocumentosPage = () => {
   const [showCartModal, setShowCartModal] = useState(false);
 
   const [total, setTotal] = useState(0);
+
+  // IDs de tipos de documento que ya tienen solicitud vigente
+  const [activeSolicitudIds, setActiveSolicitudIds] = useState<Set<number>>(new Set());
 
   const scroll = (direction: "left" | "right") => {
     if (carouselRef.current) {
@@ -84,6 +89,60 @@ export const SolicitarDocumentosPage = () => {
     };
 
     fetchDocuments();
+  }, []);
+
+  /* ------------------- FETCH SOLICITUDES VIGENTES ------------------- */
+
+  useEffect(() => {
+    const fetchActiveSolicitudes = async () => {
+      try {
+        const API_URL =
+          import.meta.env.VITE_REACT_APP_BACKEND ||
+          "https://gobdocs-backend.up.railway.app";
+
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await fetch(`${API_URL}/solicitudes/mis-solicitudes`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const solicitudes = Array.isArray(data) ? data : data.solicitudes || [];
+
+        // Estados que consideramos "vigentes" (no finalizados)
+        const estadosFinalizados = ["RECHAZADA", "CANCELADA"];
+
+        const idsActivos = new Set<number>();
+
+        for (const sol of solicitudes) {
+          const estado = (sol.Estado || "").toUpperCase();
+          if (estadosFinalizados.includes(estado)) continue;
+
+          // Intentar extraer TipoDocumento_ID de múltiples posibles ubicaciones
+          const tipoDocId =
+            sol.TipoDocumento_ID ||
+            sol.formulario?.TipoDocumento_ID ||
+            sol.formulario?.tipoDocumento?.TipoDocumento_ID ||
+            null;
+
+          if (tipoDocId) {
+            idsActivos.add(Number(tipoDocId));
+          }
+        }
+
+        setActiveSolicitudIds(idsActivos);
+      } catch (error) {
+        console.error("Error fetching solicitudes activas:", error);
+      }
+    };
+
+    fetchActiveSolicitudes();
   }, []);
 
   /* ------------------- LOAD CART ------------------- */
@@ -209,13 +268,16 @@ export const SolicitarDocumentosPage = () => {
               ) : (
                 filteredDocuments.map((doc) => {
                   const img = getImageForDoc(doc.Nombre);
+                  const yasolicitado = activeSolicitudIds.has(Number(doc.TipoDocumento_ID));
 
                   return (
                     <div
                       key={doc.TipoDocumento_ID}
-                      className="min-w-[280px] w-[280px] bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] overflow-hidden flex-shrink-0 snap-center border border-gray-100 flex flex-col"
+                      className={`min-w-[280px] w-[280px] bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] overflow-hidden flex-shrink-0 snap-center border flex flex-col ${
+                        yasolicitado ? "border-amber-300 opacity-80" : "border-gray-100"
+                      }`}
                     >
-                      <div className="bg-gray-100 h-36 w-full flex items-center justify-center overflow-hidden">
+                      <div className="bg-gray-100 h-36 w-full flex items-center justify-center overflow-hidden relative">
                         {img ? (
                           <img
                             src={img}
@@ -225,6 +287,13 @@ export const SolicitarDocumentosPage = () => {
                         ) : (
                           <ImageIcon className="text-gray-400 w-10 h-10" />
                         )}
+
+                        {yasolicitado && (
+                          <div className="absolute top-2 right-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow">
+                            <AlertCircle size={12} />
+                            Ya solicitado
+                          </div>
+                        )}
                       </div>
 
                       <div className="p-6 flex flex-col items-center flex-1 justify-between gap-6">
@@ -232,14 +301,25 @@ export const SolicitarDocumentosPage = () => {
                           {doc.Nombre}
                         </h3>
 
-                        <button
-                          onClick={() =>
-                            navigate(`/portal/crear-solicitud/${doc.TipoDocumento_ID}`)
-                          }
-                          className="w-full bg-white text-[#0f3a61] border-2 border-[#0f3a61] py-2 px-4 rounded-xl font-semibold hover:bg-[#0f3a61] hover:text-white transition-all duration-300"
-                        >
-                          Solicitar
-                        </button>
+                        {yasolicitado ? (
+                          <button
+                            onClick={() =>
+                              toast.info("Ya tienes una solicitud vigente para este documento. Revisa el estado en 'Mis Solicitudes'.")
+                            }
+                            className="w-full bg-gray-100 text-gray-400 border-2 border-gray-200 py-2 px-4 rounded-xl font-semibold cursor-not-allowed"
+                          >
+                            Solicitud vigente
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() =>
+                              navigate(`/portal/crear-solicitud/${doc.TipoDocumento_ID}`)
+                            }
+                            className="w-full bg-white text-[#0f3a61] border-2 border-[#0f3a61] py-2 px-4 rounded-xl font-semibold hover:bg-[#0f3a61] hover:text-white transition-all duration-300"
+                          >
+                            Solicitar
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
