@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { User, ChevronDown, MessageCircle, ArrowLeft } from 'lucide-react';
 import logo from '../../assets/GobDocsLogo.png';
@@ -11,6 +11,13 @@ interface DashboardLayoutProps {
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [leaving, setLeaving] = useState(false);
+
+  // Escuchar evento global para abrir el chat desde cualquier child
+  useEffect(() => {
+    const handleOpenChat = () => setIsChatOpen(true);
+    window.addEventListener('open-chat', handleOpenChat);
+    return () => window.removeEventListener('open-chat', handleOpenChat);
+  }, []);
 
   const location = useLocation();
   const navigate = useNavigate();

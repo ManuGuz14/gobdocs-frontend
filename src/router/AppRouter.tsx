@@ -13,6 +13,8 @@ import { VerSolicitudBkOfficePage } from "../modules/BackOffice/VerSolicitudIndv
 import { VerAllSolicitudBkOfficePage } from "../modules/BackOffice/VerAllSolicitudBkOfficePage.tsx";
 import { EmitirPage } from "../modules/BackOffice/EmitirPage.tsx";
 import { AprobarSolicitudPage } from "../modules/BackOffice/AprobarSolicitudPage.tsx";
+import { ProfileOperatorPage } from "../modules/BackOffice/ProfileOperatorPage.tsx";
+import { DocumentosEmitidosPage } from "../modules/BackOffice/DocumentosEmitidosPage.tsx";
 import { PagoExitosoPage } from '../modules/ciudadano/pages/PagoExitosoPage.tsx';
 import { SolicitudDetailPage } from '../modules/ciudadano/pages/MiSolicitudDetailPage';
 import { PaymentPage } from '../modules/ciudadano/pages/PaymentPage.tsx';
@@ -47,6 +49,8 @@ export const AppRouter = () => {
         <Route path="/backoffice/solicitud/:id" element={<VerSolicitudBkOfficePage />} />
         <Route path="/backoffice/emitir" element={<EmitirPage />} />
         <Route path="/backoffice/aprobar/:id" element={<AprobarSolicitudPage />} />
+        <Route path="/backoffice/perfil" element={<ProfileOperatorPage />} />
+        <Route path="/backoffice/documentos" element={<DocumentosEmitidosPage />} />
 
         <Route path="*" element={<div>404 - No encontrado</div>} />
       </Routes>

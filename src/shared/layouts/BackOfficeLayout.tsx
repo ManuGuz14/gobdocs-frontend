@@ -11,7 +11,7 @@ export const BackofficeLayout: React.FC<BackofficeLayoutProps> = ({ children }) 
 
   const location = useLocation();
   const navigate = useNavigate();
-  const showBackButton = location.pathname !== "/backoffice";
+  const showBackButton = location.pathname !== "/backoffice" && location.pathname !== "/landingbkoffice";
 
   return (
     <div className="min-h-screen bg-white flex flex-col relative overflow-visible">
@@ -73,7 +73,7 @@ export const BackofficeLayout: React.FC<BackofficeLayoutProps> = ({ children }) 
 
             {/* EMITIR */}
             <Link
-              to="/backoffice/emitir"
+              to="/backoffice/solicitudes"
               className="hidden md:flex items-center gap-1 hover:text-blue-200"
             >
               <span className="font-medium">Emitir</span>

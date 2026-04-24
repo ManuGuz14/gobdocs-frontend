@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { DashboardLayout } from "../../../shared/layouts/DashboardLayout";
 import { Input } from "../../../shared/ui/Input";
 import { Button } from "../../../shared/ui/Button";
@@ -29,6 +30,7 @@ export const CreateSolicitudPage = () => {
   >([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [duplicado, setDuplicado] = useState(false);
 
   /* ------------------ FETCH FORM + TARIFAS ------------------ */
 
@@ -81,6 +83,49 @@ export const CreateSolicitudPage = () => {
     fetchData();
   }, [tipoDocumentoId]);
 
+  /* ------------------ CHECK DUPLICADO ------------------ */
+
+  useEffect(() => {
+    const checkDuplicado = async () => {
+      if (!tipoDocumentoId) return;
+
+      try {
+        const res = await fetch(`${API_URL}/solicitudes/mis-solicitudes`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const solicitudes = Array.isArray(data) ? data : data.solicitudes || [];
+
+        const estadosFinalizados = ["RECHAZADA", "CANCELADA"];
+
+        const yaSolicitado = solicitudes.some((sol: any) => {
+          const estado = (sol.Estado || "").toUpperCase();
+          if (estadosFinalizados.includes(estado)) return false;
+
+          const tipoDocId =
+            sol.TipoDocumento_ID ||
+            sol.formulario?.TipoDocumento_ID ||
+            sol.formulario?.tipoDocumento?.TipoDocumento_ID ||
+            null;
+
+          return tipoDocId && Number(tipoDocId) === Number(tipoDocumentoId);
+        });
+
+        setDuplicado(yaSolicitado);
+      } catch (error) {
+        console.error("Error verificando duplicado:", error);
+      }
+    };
+
+    checkDuplicado();
+  }, [tipoDocumentoId]);
+
   /* ------------------ HANDLE CHANGE ------------------ */
 
   const handleChange = (name: string, value: any) => {
@@ -92,16 +137,34 @@ export const CreateSolicitudPage = () => {
 
   /* ------------------ 🛒 ADD TO CART ------------------ */
 
+  const validateAllFields = (): boolean => {
+    const campos = form?.Form_Definition?.campos || [];
+    const missing: string[] = [];
+
+    for (const campo of campos) {
+      const value = formData[campo.name];
+      if (!value || (typeof value === "string" && value.trim() === "")) {
+        missing.push(campo.label || campo.name);
+      }
+    }
+
+    if (missing.length > 0) {
+      toast.warning(
+        `Completa los siguientes campos: ${missing.join(", ")}`
+      );
+      return false;
+    }
+
+    return true;
+  };
+
   const handleAddToCart = () => {
     if (!form?.Formulario_ID) return;
 
-    if (!formData || Object.keys(formData).length === 0) {
-      alert("Completa el formulario");
-      return;
-    }
+    if (!validateAllFields()) return;
 
     if (!detalles.length) {
-      alert("Este documento no tiene tarifas configuradas.");
+      toast.error("Este documento no tiene tarifas configuradas.");
       return;
     }
 
@@ -131,17 +194,14 @@ export const CreateSolicitudPage = () => {
 
   const handleGoToPayment = async () => {
     if (!form?.Formulario_ID) {
-      alert("Formulario inválido");
+      toast.error("Formulario inválido");
       return;
     }
 
-    if (!formData || Object.keys(formData).length === 0) {
-      alert("Completa el formulario");
-      return;
-    }
+    if (!validateAllFields()) return;
 
     if (!detalles.length) {
-      alert("Este documento no tiene tarifas configuradas.");
+      toast.error("Este documento no tiene tarifas configuradas.");
       return;
     }
 
@@ -185,7 +245,7 @@ export const CreateSolicitudPage = () => {
       navigate(`/portal/pago/${numeroSolicitud}`);
     } catch (error) {
       console.error(error);
-      alert("Error creando la solicitud");
+      toast.error("Error creando la solicitud");
     } finally {
       setSubmitting(false);
     }
@@ -209,6 +269,21 @@ export const CreateSolicitudPage = () => {
         <h1 className="text-2xl font-bold mb-6">
           Crear Solicitud
         </h1>
+
+        {/* ⚠️ BANNER DUPLICADO */}
+        {duplicado && (
+          <div className="mb-6 p-4 bg-amber-50 border-2 border-amber-300 rounded-xl flex items-start gap-3">
+            <span className="text-amber-500 text-xl mt-0.5">⚠️</span>
+            <div>
+              <p className="font-semibold text-amber-800">
+                Ya tienes una solicitud vigente para este documento
+              </p>
+              <p className="text-amber-700 text-sm mt-1">
+                Revisa el estado de tu solicitud en "Mis Solicitudes" antes de crear una nueva.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4">
           {form?.Form_Definition?.campos?.map((campo: any) => {
@@ -272,17 +347,26 @@ export const CreateSolicitudPage = () => {
         <div className="mt-6 space-y-3">
           <Button
             onClick={handleAddToCart}
-            className="w-full p-2 rounded-xl bg-gray-200 text-gray-800"
+            disabled={duplicado}
+            className={`w-full p-2 rounded-xl ${
+              duplicado
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-gray-200 text-gray-800"
+            }`}
           >
             Agregar otro documento
           </Button>
 
           <Button
             onClick={handleGoToPayment}
-            disabled={submitting}
-            className="w-full p-2 rounded-xl bg-gobdocs-primary text-white hover:bg-gobdocs-secondaryblue transition"
+            disabled={submitting || duplicado}
+            className={`w-full p-2 rounded-xl transition ${
+              duplicado
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-gobdocs-primary text-white hover:bg-gobdocs-secondaryblue"
+            }`}
           >
-            {submitting ? "Procesando..." : "Ir a pagar"}
+            {submitting ? "Procesando..." : duplicado ? "Solicitud vigente" : "Ir a pagar"}
           </Button>
         </div>
       </div>
