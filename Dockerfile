@@ -13,6 +13,7 @@ RUN npm install
 
 COPY . .
 
+# run dev instead of build
 RUN npm run dev
 
 # Etapa de producción
