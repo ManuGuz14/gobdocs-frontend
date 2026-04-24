@@ -116,16 +116,34 @@ export const SolicitudDetailPage = () => {
           </h2>
 
           <div className="grid md:grid-cols-2 gap-4">
-            {Object.entries(respuestas).map(([key, value]) => (
-              <div key={key} className="bg-gray-50 p-4 rounded-lg border">
-                <p className="text-xs text-gray-500 uppercase">
-                  {labelsMap[key] || key}
-                </p>
-                <p className="text-sm font-medium text-gray-800">
-                  {value as string}
-                </p>
-              </div>
-            ))}
+            {Object.entries(respuestas).map(([key, value]) => {
+              const label = labelsMap[key] || key;
+              const isCedula =
+                key.toLowerCase().includes("cedula") ||
+                key.toLowerCase().includes("cédula") ||
+                label.toLowerCase().includes("cedula") ||
+                label.toLowerCase().includes("cédula");
+
+              let displayValue = value as string;
+
+              if (isCedula && typeof displayValue === "string" && displayValue.length > 3) {
+                // Mostrar solo los últimos 3 caracteres, el resto con *
+                const visible = displayValue.slice(-3);
+                const masked = displayValue.slice(0, -3).replace(/[0-9a-zA-Z]/g, "*");
+                displayValue = masked + visible;
+              }
+
+              return (
+                <div key={key} className="bg-gray-50 p-4 rounded-lg border">
+                  <p className="text-xs text-gray-500 uppercase">
+                    {label}
+                  </p>
+                  <p className="text-sm font-medium text-gray-800">
+                    {displayValue}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
 

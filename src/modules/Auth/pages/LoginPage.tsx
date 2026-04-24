@@ -112,9 +112,9 @@ export const LoginPage = () => {
         />
 
         <div className="flex justify-start mb-6">
-          <a href="#" className="text-xs text-gray-500 hover:text-gobdocs-primary underline">
+          <Link to="/auth/olvide-contrasena" className="text-xs text-gray-500 hover:text-gobdocs-primary underline">
             He olvidado mi contraseña
-          </a>
+          </Link>
         </div>
 
         <Button type="submit" disabled={isLoading}>
