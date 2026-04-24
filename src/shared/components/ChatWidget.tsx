@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, MoreHorizontal, Send, Sparkles, User } from 'lucide-react';
+import { X, MoreHorizontal, Send, Sparkles, User, HelpCircle, ChevronRight } from 'lucide-react';
+import { toast } from 'react-toastify';
 import { LoadingScreen } from './LoadingScreen';
 
 interface ChatWidgetProps {
@@ -10,6 +11,42 @@ const MAIN_OPTIONS = [
   'Solicitar documento',
   'Visualizar documento',
   'Visualizar solicitud',
+  'Preguntas frecuentes',
+];
+
+const FAQ_DATA = [
+  {
+    question: '¿Cómo solicito un documento?',
+    answer: 'Puedes solicitar un documento desde la sección "Solicitar documentos" en el menú lateral, o directamente desde este chat seleccionando "Solicitar documento". Solo elige la institución, el tipo de documento, completa el formulario y procede al pago.',
+  },
+  {
+    question: '¿Cuánto tiempo tarda mi solicitud?',
+    answer: 'El tiempo de procesamiento varía según el tipo de documento. Generalmente las solicitudes se procesan entre 3 a 5 días hábiles. Puedes verificar el estado de tu solicitud en "Mis Solicitudes" en cualquier momento.',
+  },
+  {
+    question: '¿Qué métodos de pago aceptan?',
+    answer: 'Aceptamos pagos con tarjeta de crédito y débito (Visa, Mastercard) a través de nuestra plataforma segura de pagos con Stripe.',
+  },
+  {
+    question: '¿Puedo cancelar una solicitud?',
+    answer: 'Una vez realizada la solicitud y completado el pago, no es posible cancelarla directamente desde la plataforma. Te recomendamos contactar a la institución correspondiente para gestionar la cancelación.',
+  },
+  {
+    question: '¿Dónde veo mis documentos emitidos?',
+    answer: 'Puedes ver y descargar todos tus documentos emitidos desde la sección "Mis Documentos" en el menú lateral del portal.',
+  },
+  {
+    question: '¿Qué hago si olvidé mi contraseña?',
+    answer: 'En la pantalla de inicio de sesión encontrarás el enlace "He olvidado mi contraseña". Sigue las instrucciones para restablecer tu contraseña de forma segura.',
+  },
+  {
+    question: '¿Puedo solicitar el mismo documento dos veces?',
+    answer: 'No puedes tener dos solicitudes vigentes del mismo tipo de documento. Debes esperar a que tu solicitud actual sea procesada (aprobada o rechazada) antes de crear una nueva.',
+  },
+  {
+    question: '¿Es segura la plataforma?',
+    answer: 'Sí, GobDocs RD utiliza encriptación de datos y procesamiento de pagos seguro con Stripe. Tu información personal está protegida con los más altos estándares de seguridad.',
+  },
 ];
 
 export const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
@@ -37,6 +74,10 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
   const [total, setTotal] = useState<number>(0);
 
   const [showConfirm, setShowConfirm] = useState(false);
+  const [activeSolicitudIds, setActiveSolicitudIds] = useState<Set<number>>(new Set());
+
+  // FAQ state
+  const [selectedFaq, setSelectedFaq] = useState<number | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -51,16 +92,49 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
     selectedInstitution,
     selectedDocument,
     formData,
-    showConfirm
+    showConfirm,
+    selectedFaq
   ]);
 
-  // 🔥 FETCH INSTITUTIONS
+  // 🔥 FETCH INSTITUTIONS + SOLICITUDES ACTIVAS
   useEffect(() => {
     if (selectedMainOption === 'Solicitar documento') {
       fetch(`${API_URL}/institution`)
         .then(res => res.json())
         .then(data => setInstitutions(data))
         .catch(() => setInstitutions([]));
+
+      // Fetch solicitudes activas para detectar duplicados
+      if (token) {
+        fetch(`${API_URL}/solicitudes/mis-solicitudes`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then(res => res.json())
+          .then(data => {
+            const solicitudes = Array.isArray(data) ? data : data.solicitudes || [];
+            const estadosFinalizados = ['RECHAZADA', 'CANCELADA'];
+            const ids = new Set<number>();
+
+            for (const sol of solicitudes) {
+              const estado = (sol.Estado || '').toUpperCase();
+              if (estadosFinalizados.includes(estado)) continue;
+
+              const tipoDocId =
+                sol.TipoDocumento_ID ||
+                sol.formulario?.TipoDocumento_ID ||
+                sol.formulario?.tipoDocumento?.TipoDocumento_ID ||
+                null;
+
+              if (tipoDocId) ids.add(Number(tipoDocId));
+            }
+
+            setActiveSolicitudIds(ids);
+          })
+          .catch(() => {});
+      }
     }
   }, [selectedMainOption]);
 
@@ -255,15 +329,30 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
             </div>
 
             <div className="pl-9">
-              {documents.map((doc) => (
-                <button
-                  key={doc.TipoDocumento_ID}
-                  onClick={() => handleDocumentSelect(doc)}
-                  className="block w-full text-left p-3 border-b"
-                >
-                  {doc.Nombre}
-                </button>
-              ))}
+              {documents.map((doc) => {
+                const yaSolicitado = activeSolicitudIds.has(Number(doc.TipoDocumento_ID));
+
+                return (
+                  <button
+                    key={doc.TipoDocumento_ID}
+                    onClick={() => {
+                      if (yaSolicitado) {
+                        toast.info('Ya tienes una solicitud vigente para este documento. Revisa "Mis Solicitudes".');
+                        return;
+                      }
+                      handleDocumentSelect(doc);
+                    }}
+                    className={`block w-full text-left p-3 border-b ${
+                      yaSolicitado ? 'opacity-50 bg-amber-50' : ''
+                    }`}
+                  >
+                    {doc.Nombre}
+                    {yaSolicitado && (
+                      <span className="ml-2 text-xs text-amber-600 font-semibold">⚠️ Ya solicitado</span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </>
         )}
@@ -301,7 +390,20 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
             )}
 
             <button
-              onClick={() => setShowConfirm(true)}
+              onClick={() => {
+                const missing: string[] = [];
+                for (const field of formFields) {
+                  const value = formData[field.name];
+                  if (!value || (typeof value === 'string' && value.trim() === '')) {
+                    missing.push(field.label || field.name);
+                  }
+                }
+                if (missing.length > 0) {
+                  toast.warning(`Completa los siguientes campos: ${missing.join(', ')}`);
+                  return;
+                }
+                setShowConfirm(true);
+              }}
               className="bg-gobdocs-primary text-white p-3 rounded-xl mt-3"
             >
               Confirmar solicitud
@@ -317,6 +419,69 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
           >
             Ir a pagar
           </button>
+        )}
+
+        {/* FAQ */}
+        {selectedMainOption === 'Preguntas frecuentes' && (
+          <>
+            {/* Bot message */}
+            <div className="flex gap-3 items-start">
+              <div className="mt-1 text-gobdocs-primary">
+                <Sparkles size={24} fill="#1a2b5e" />
+              </div>
+              <div className="bg-gobdocs-primary text-white p-4 rounded-r-2xl rounded-bl-2xl max-w-[85%] shadow-sm">
+                Estas son las preguntas más frecuentes. Selecciona una para ver la respuesta.
+              </div>
+            </div>
+
+            {/* FAQ List */}
+            <div className="pl-9 w-full max-w-[90%]">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                {FAQ_DATA.map((faq, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedFaq(selectedFaq === index ? null : index)}
+                    className={`w-full text-left px-4 py-3 text-sm border-b last:border-0 flex items-center gap-2 transition-colors ${
+                      selectedFaq === index
+                        ? 'bg-blue-50 text-gobdocs-primary font-semibold'
+                        : 'hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    <HelpCircle size={14} className="flex-shrink-0 text-gobdocs-primary" />
+                    <span className="flex-1">{faq.question}</span>
+                    <ChevronRight
+                      size={14}
+                      className={`flex-shrink-0 text-gray-400 transition-transform duration-200 ${
+                        selectedFaq === index ? 'rotate-90' : ''
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Selected FAQ Answer */}
+            {selectedFaq !== null && (
+              <>
+                {/* User question bubble */}
+                <div className="flex justify-end">
+                  <div className="bg-gobdocs-primary text-white p-3 rounded-l-2xl rounded-tr-2xl max-w-[85%] text-sm">
+                    {FAQ_DATA[selectedFaq].question}
+                  </div>
+                </div>
+
+                {/* Bot answer bubble */}
+                <div className="flex gap-3 items-start">
+                  <div className="mt-1 text-gobdocs-primary">
+                    <Sparkles size={24} fill="#1a2b5e" />
+                  </div>
+                  <div className="bg-gobdocs-primary text-white p-4 rounded-r-2xl rounded-bl-2xl max-w-[85%] shadow-sm text-sm leading-relaxed">
+                    {FAQ_DATA[selectedFaq].answer}
+                  </div>
+                </div>
+              </>
+            )}
+          </>
         )}
 
         <div ref={messagesEndRef} />

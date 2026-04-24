@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import {
   CardNumberElement,
   CardExpiryElement,
@@ -122,6 +123,22 @@ export const PaymentPage = () => {
   return (
     <DashboardLayout>
       <div className="max-w-xl mx-auto p-6 bg-white rounded-2xl shadow">
+        {/* BOTÓN VOLVER */}
+        <button
+          onClick={() => {
+            const confirmed = window.confirm(
+              "¿Estás seguro de que deseas cancelar el pago? Podrás volver a pagar desde tus solicitudes."
+            );
+            if (confirmed) {
+              navigate("/portal/solicitudes");
+            }
+          }}
+          className="flex items-center gap-2 text-gray-500 hover:text-gobdocs-primary mb-4 transition-colors font-medium"
+        >
+          <ArrowLeft size={20} />
+          Volver
+        </button>
+
         <h1 className="text-2xl font-bold mb-6">Completar Pago</h1>
 
         {/* 💰 MONTO */}
@@ -163,13 +180,28 @@ export const PaymentPage = () => {
           </div>
         </div>
 
-        {/* 🔘 BOTÓN */}
+        {/* 🔘 BOTONES */}
         <button
           onClick={handlePayment}
           disabled={!stripe || paying}
           className="w-full bg-gobdocs-primary text-white py-3 rounded-xl font-semibold hover:bg-blue-900 transition disabled:opacity-50"
         >
           {paying ? "Procesando..." : "Pagar ahora"}
+        </button>
+
+        <button
+          onClick={() => {
+            const confirmed = window.confirm(
+              "¿Estás seguro de que deseas cancelar el pago?"
+            );
+            if (confirmed) {
+              navigate("/portal/solicitudes");
+            }
+          }}
+          disabled={paying}
+          className="w-full mt-3 bg-white text-red-500 border-2 border-red-400 py-3 rounded-xl font-semibold hover:bg-red-50 transition disabled:opacity-50"
+        >
+          Cancelar pago
         </button>
       </div>
     </DashboardLayout>
