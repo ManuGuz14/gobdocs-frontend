@@ -20,6 +20,8 @@ import { DocumentosEmitidosPage } from "../modules/BackOffice/DocumentosEmitidos
 import { PagoExitosoPage } from '../modules/ciudadano/pages/PagoExitosoPage.tsx';
 import { SolicitudDetailPage } from '../modules/ciudadano/pages/MiSolicitudDetailPage';
 import { PaymentPage } from '../modules/ciudadano/pages/PaymentPage.tsx';
+import { AdminDashboardPage } from '../modules/Admin/pages/AdminDashboardPage';
+import { BulkUploadPage } from '../modules/Admin/pages/BulkUploadPage';
 
 export const AppRouter = () => {
   const location = useLocation();
@@ -56,6 +58,10 @@ export const AppRouter = () => {
         <Route path="/backoffice/aprobar/:id" element={<AprobarSolicitudPage />} />
         <Route path="/backoffice/perfil" element={<ProfileOperatorPage />} />
         <Route path="/backoffice/documentos" element={<DocumentosEmitidosPage />} />
+
+        {/* Admin */}
+        <Route path="/admin" element={<AdminDashboardPage />} />
+        <Route path="/admin/carga-masiva" element={<BulkUploadPage />} />
 
         <Route path="*" element={<div>404 - No encontrado</div>} />
       </Routes>

@@ -48,11 +48,15 @@ export const LoginPage = () => {
         localStorage.setItem('user', JSON.stringify(data.user));
         toast.success(`¡Bienvenido de nuevo, ${data.user.nombre}!`);
 
-        // Comprobar si el usuario es operador (por rol o id de institución)
-        const isOperator = data.user.rol === 'operador' || data.user.rol === 'OPERADOR' || data.user.institucionId || data.user.institucion_id;
+        // Comprobar el rol del usuario para redirigir
+        const rol = (data.user.rol || '').toLowerCase();
+        const isAdmin = rol === 'admin';
+        const isOperator = rol === 'operador' || data.user.institucionId || data.user.institucion_id;
 
         setTimeout(() => {
-          if (isOperator) {
+          if (isAdmin) {
+            navigate('/admin');
+          } else if (isOperator) {
             navigate('/landingbkoffice');
           } else {
             navigate('/portal');
