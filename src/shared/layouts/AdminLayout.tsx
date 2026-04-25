@@ -74,6 +74,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                   >
                     Formularios
                   </Link>
+                  <Link
+                    to="/admin/tarifas"
+                    className="block px-6 py-3 text-sm text-[#1a2b5e] hover:bg-blue-50"
+                  >
+                    Asignar tarifas
+                  </Link>
                   <div className="border-t my-1"></div>
                   <Link
                     to="/admin/carga-masiva"
