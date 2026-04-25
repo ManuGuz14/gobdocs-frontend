@@ -46,6 +46,7 @@ export const AppRouter = () => {
         <Route path="/portal/solicitudes" element={<MisSolicitudesPage />} />
         <Route path="/portal/mi-solicitud/:id" element={<SolicitudDetailPage />} />
         <Route path="/portal/pago/:numeroSolicitud" element={<PaymentPage />} />
+        <Route path="/portal/pago/multiple" element={<PaymentPage />} />
         <Route path="/portal/pago-exitoso" element={<PagoExitosoPage />} />
 
         {/* Backoffice */}
