@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { useSearchParams, useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, AlertTriangle, X } from "lucide-react";
 import {
   CardNumberElement,
   CardExpiryElement,
@@ -9,9 +9,17 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { DashboardLayout } from "../../../shared/layouts/DashboardLayout";
+import { toast } from "react-toastify";
+import { useLocation } from "react-router-dom";
 
 export const PaymentPage = () => {
   const { numeroSolicitud } = useParams();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const isMultiple = searchParams.get("multiple") === "true" ||
+  location.pathname.includes("multiple");
+
+
   const navigate = useNavigate();
 
   const stripe = useStripe();
@@ -28,42 +36,68 @@ export const PaymentPage = () => {
   const [loadingIntent, setLoadingIntent] = useState(true);
   const [paying, setPaying] = useState(false);
 
+  const [showCancelModal, setShowCancelModal] = useState(false);
+
   /* ------------------ CREAR PAYMENT INTENT ------------------ */
 
   useEffect(() => {
     const createIntent = async () => {
-      if (!numeroSolicitud) return;
-
       try {
-        const res = await fetch(
-          `${API_URL}/payments/create-intent/${numeroSolicitud}`,
-          {
+        let res;
+        let data;
+
+        if (isMultiple) {
+          const storedIds = JSON.parse(
+            localStorage.getItem("gobdocs_payment_solicitud_ids") || "[]"
+          );
+
+          if (!storedIds.length) {
+            toast.error("No hay solicitudes para pagar");
+            navigate("/portal/solicitar");
+            return;
+          }
+
+          res = await fetch(`${API_URL}/payments/create-intent-from-solicitudes`, {
             method: "POST",
             headers: {
+              "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-          }
-        );
+            body: JSON.stringify({
+              solicitudIds: storedIds,
+            }),
+          });
+        } else {
+          if (!numeroSolicitud) return;
 
-        const data = await res.json();
-
-        if (!res.ok) {
-          console.error(data);
-          throw new Error("Error creando PaymentIntent");
+          res = await fetch(
+            `${API_URL}/payments/create-intent/${numeroSolicitud}`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
         }
 
+        data = await res.json();
+
+        if (!res.ok) throw new Error();
+
         setClientSecret(data.client_secret);
-        setMonto(data.monto); // 👈 mostrar total
+        setMonto(data.monto);
+
       } catch (error) {
         console.error("❌ Error creando intent:", error);
-        alert("Error iniciando el pago");
+        toast.error("Error iniciando el pago");
       } finally {
         setLoadingIntent(false);
       }
     };
 
     createIntent();
-  }, [numeroSolicitud]);
+  }, [numeroSolicitud, isMultiple]);
 
   /* ------------------ HANDLE PAGO ------------------ */
 
@@ -82,30 +116,62 @@ export const PaymentPage = () => {
       });
 
       if (result.error) {
-        alert(result.error.message);
+        toast.error(result.error.message);
         setPaying(false);
         return;
       }
 
-      await fetch(`${API_URL}/payments/confirm`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          paymentIntentId: result.paymentIntent.id,
-          solicitudId: Number(numeroSolicitud),
-        }),
-      });
+      if (isMultiple) {
+        const storedIds = JSON.parse(
+          localStorage.getItem("gobdocs_payment_solicitud_ids") || "[]"
+        );
 
+        await fetch(`${API_URL}/payments/confirm-multiple`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            paymentIntentId: result.paymentIntent.id,
+            solicitudIds: storedIds,
+          }),
+        });
+
+        // 🔥 limpiar storage
+        localStorage.removeItem("gobdocs_payment_solicitud_ids");
+        localStorage.removeItem("gobdocs_cart");
+
+      } else {
+        await fetch(`${API_URL}/payments/confirm`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            paymentIntentId: result.paymentIntent.id,
+            solicitudId: Number(numeroSolicitud),
+          }),
+        });
+      }
+
+      toast.success("Pago realizado correctamente 🎉");
       navigate("/portal/pago-exitoso");
+
     } catch (error) {
       console.error(error);
-      alert("Error procesando el pago");
+      toast.error("Error procesando el pago");
     } finally {
       setPaying(false);
     }
+  };
+
+  /* ------------------ CANCELAR ------------------ */
+
+  const handleCancelPayment = () => {
+    toast.info("Pago cancelado. Puedes retomarlo luego desde tus solicitudes.");
+    navigate("/portal/solicitudes");
   };
 
   /* ------------------ UI ------------------ */
@@ -121,89 +187,117 @@ export const PaymentPage = () => {
   }
 
   return (
-    <DashboardLayout>
-      <div className="max-w-xl mx-auto p-6 bg-white rounded-2xl shadow">
-        {/* BOTÓN VOLVER */}
-        <button
-          onClick={() => {
-            const confirmed = window.confirm(
-              "¿Estás seguro de que deseas cancelar el pago? Podrás volver a pagar desde tus solicitudes."
-            );
-            if (confirmed) {
-              navigate("/portal/solicitudes");
-            }
-          }}
-          className="flex items-center gap-2 text-gray-500 hover:text-gobdocs-primary mb-4 transition-colors font-medium"
-        >
-          <ArrowLeft size={20} />
-          Volver
-        </button>
+    <>
+      <DashboardLayout>
+        <div className="max-w-xl mx-auto p-6 bg-white rounded-2xl shadow">
 
-        <h1 className="text-2xl font-bold mb-6">Completar Pago</h1>
+          <button
+            onClick={() => setShowCancelModal(true)}
+            className="flex items-center gap-2 text-gray-500 hover:text-gobdocs-primary mb-4 transition-colors font-medium"
+          >
+            <ArrowLeft size={20} />
+            Volver
+          </button>
 
-        {/* 💰 MONTO */}
-        <div className="mb-6 p-4 bg-gray-100 rounded-xl">
-          <p className="text-sm text-gray-500">Total a pagar</p>
-          <p className="text-2xl font-bold text-gobdocs-primary">
-            RD$ {monto}
-          </p>
-        </div>
+          <h1 className="text-2xl font-bold mb-6">Completar Pago</h1>
 
-        {/* 💳 CARD NUMBER */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">
-            Número de tarjeta
-          </label>
-          <div className="border rounded-lg p-3">
-            <CardNumberElement />
+          <div className="mb-6 p-4 bg-gray-100 rounded-xl">
+            <p className="text-sm text-gray-500">Total a pagar</p>
+            <p className="text-2xl font-bold text-gobdocs-primary">
+              RD$ {monto}
+            </p>
           </div>
-        </div>
 
-        {/* 📅 + CVV */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div>
+          <div className="mb-4">
             <label className="block text-sm font-medium mb-1">
-              Fecha de expiración
+              Número de tarjeta
             </label>
             <div className="border rounded-lg p-3">
-              <CardExpiryElement />
+              <CardNumberElement />
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              CVV
-            </label>
-            <div className="border rounded-lg p-3">
-              <CardCvcElement />
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Fecha de expiración
+              </label>
+              <div className="border rounded-lg p-3">
+                <CardExpiryElement />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                CVV
+              </label>
+              <div className="border rounded-lg p-3">
+                <CardCvcElement />
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={handlePayment}
+            disabled={!stripe || paying}
+            className="w-full bg-gobdocs-primary text-white py-3 rounded-xl font-semibold hover:bg-blue-900 transition disabled:opacity-50"
+          >
+            {paying ? "Procesando..." : "Pagar ahora"}
+          </button>
+
+          <button
+            onClick={() => setShowCancelModal(true)}
+            disabled={paying}
+            className="w-full mt-3 bg-white text-red-500 border-2 border-red-400 py-3 rounded-xl font-semibold hover:bg-red-50 transition disabled:opacity-50"
+          >
+            Cancelar pago
+          </button>
+        </div>
+      </DashboardLayout>
+
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+
+            <button
+              onClick={() => setShowCancelModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                <AlertTriangle size={32} className="text-red-500" />
+              </div>
+
+              <h3 className="text-xl font-bold text-gray-800 mb-2">
+                ¿Cancelar pago?
+              </h3>
+
+              <p className="text-gray-500 text-sm mb-8">
+                Si sales ahora, podrás retomar el pago más tarde desde tus solicitudes.
+              </p>
+
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  className="px-6 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50"
+                >
+                  Volver
+                </button>
+
+                <button
+                  onClick={handleCancelPayment}
+                  className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                >
+                  Sí, cancelar
+                </button>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* 🔘 BOTONES */}
-        <button
-          onClick={handlePayment}
-          disabled={!stripe || paying}
-          className="w-full bg-gobdocs-primary text-white py-3 rounded-xl font-semibold hover:bg-blue-900 transition disabled:opacity-50"
-        >
-          {paying ? "Procesando..." : "Pagar ahora"}
-        </button>
-
-        <button
-          onClick={() => {
-            const confirmed = window.confirm(
-              "¿Estás seguro de que deseas cancelar el pago?"
-            );
-            if (confirmed) {
-              navigate("/portal/solicitudes");
-            }
-          }}
-          disabled={paying}
-          className="w-full mt-3 bg-white text-red-500 border-2 border-red-400 py-3 rounded-xl font-semibold hover:bg-red-50 transition disabled:opacity-50"
-        >
-          Cancelar pago
-        </button>
-      </div>
-    </DashboardLayout>
+      )}
+    </>
   );
 };

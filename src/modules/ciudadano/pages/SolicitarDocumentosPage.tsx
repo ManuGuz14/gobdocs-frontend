@@ -30,7 +30,6 @@ export const SolicitarDocumentosPage = () => {
 
   const [total, setTotal] = useState(0);
 
-  // IDs de tipos de documento que ya tienen solicitud vigente
   const [activeSolicitudIds, setActiveSolicitudIds] = useState<Set<number>>(new Set());
 
   const scroll = (direction: "left" | "right") => {
@@ -39,8 +38,6 @@ export const SolicitarDocumentosPage = () => {
       carouselRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
   };
-
-  /* ------------------- 🔥 MAPEAR IMAGENES ------------------- */
 
   const getImageForDoc = (nombre: string) => {
     const name = nombre?.toLowerCase() || "";
@@ -59,8 +56,6 @@ export const SolicitarDocumentosPage = () => {
 
     return null;
   };
-
-  /* ------------------- FETCH DOCUMENT TYPES ------------------- */
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -91,8 +86,6 @@ export const SolicitarDocumentosPage = () => {
     fetchDocuments();
   }, []);
 
-  /* ------------------- FETCH SOLICITUDES VIGENTES ------------------- */
-
   useEffect(() => {
     const fetchActiveSolicitudes = async () => {
       try {
@@ -115,8 +108,7 @@ export const SolicitarDocumentosPage = () => {
         const data = await res.json();
         const solicitudes = Array.isArray(data) ? data : data.solicitudes || [];
 
-        // Estados que consideramos "vigentes" (no finalizados)
-        const estadosFinalizados = ["RECHAZADA", "CANCELADA"];
+        const estadosFinalizados = ["RECHAZADA", "CANCELADA", "APROBADA"];
 
         const idsActivos = new Set<number>();
 
@@ -124,7 +116,6 @@ export const SolicitarDocumentosPage = () => {
           const estado = (sol.Estado || "").toUpperCase();
           if (estadosFinalizados.includes(estado)) continue;
 
-          // Intentar extraer TipoDocumento_ID de múltiples posibles ubicaciones
           const tipoDocId =
             sol.TipoDocumento_ID ||
             sol.formulario?.TipoDocumento_ID ||
@@ -145,14 +136,10 @@ export const SolicitarDocumentosPage = () => {
     fetchActiveSolicitudes();
   }, []);
 
-  /* ------------------- LOAD CART ------------------- */
-
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("gobdocs_cart") || "[]");
     setCart(storedCart);
   }, [location.key]);
-
-  /* ------------------- CALCULAR TOTAL ------------------- */
 
   useEffect(() => {
     let totalCalculado = 0;
@@ -187,7 +174,7 @@ export const SolicitarDocumentosPage = () => {
     const token = localStorage.getItem("token");
 
     if (!cart.length) {
-      alert("No hay solicitudes en el carrito");
+      toast.warning("No hay solicitudes en el carrito");
       return;
     }
 
@@ -213,18 +200,27 @@ export const SolicitarDocumentosPage = () => {
 
       if (!res.ok) throw new Error();
 
-      const numeroSolicitud = Array.isArray(data)
-        ? data[0]?.Numero_Solicitud
-        : data?.Numero_Solicitud;
+      const solicitudIds = Array.isArray(data)
+        ? data.map((s: any) => s.Numero_Solicitud).filter(Boolean)
+        : [data?.Numero_Solicitud].filter(Boolean);
 
       localStorage.removeItem("gobdocs_cart");
       setCart([]);
       setShowCartModal(false);
 
-      navigate(`/portal/pago/${numeroSolicitud}`);
+      if (solicitudIds.length > 1) {
+        localStorage.setItem(
+          "gobdocs_payment_solicitud_ids",
+          JSON.stringify(solicitudIds)
+        );
+
+        navigate("/portal/pago/multiple");
+      } else {
+        navigate(`/portal/pago/${solicitudIds[0]}`);
+      }
     } catch (error) {
       console.error(error);
-      alert("Error creando la solicitud");
+      toast.error("Error creando la solicitud");
     }
   };
 
@@ -361,11 +357,29 @@ export const SolicitarDocumentosPage = () => {
 
             <div className="space-y-3">
               {cart.length > 0 ? (
-                cart.map((item, index) => (
-                  <div key={index} className="border rounded-lg p-3">
-                    Documento #{index + 1}
-                  </div>
-                ))
+                cart.map((item, index) => {
+                  const precio = item.tarifas
+                    ? item.tarifas.reduce(
+                        (acc: number, t: any) =>
+                          acc + Number(t.Costo_Por_Servicio || 0),
+                        0
+                      )
+                    : 0;
+
+                  return (
+                    <div key={index} className="border rounded-lg p-3">
+                      <p className="font-semibold text-gobdocs-primary">
+                        Solicitud #{index + 1}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Documento: {item.Nombre || item.nombre || "Documento no disponible"}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Monto: RD$ {precio}
+                      </p>
+                    </div>
+                  );
+                })
               ) : (
                 <div className="border rounded-lg p-4 text-center text-gray-500">
                   El carrito está vacío
