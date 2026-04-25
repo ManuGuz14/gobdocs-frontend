@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { LoginPage } from '../modules/Auth/pages/LoginPage';
 import { RegisterPage } from '../auth/ui/RegisterPage';
 import { OlvideContrasenaPage } from '../auth/ui/OlvideContrasenaPage';
+import { ResetPasswordPage } from '../auth/ui/ResetPasswordPage';
 import { DashboardPage } from '../modules/ciudadano/pages/DashboardPage';
 import { CreateSolicitudPage } from '../modules/ciudadano/pages/CreateSolicitudPage';
 import { SolicitarDocumentosPage } from '../modules/ciudadano/pages/SolicitarDocumentosPage';
@@ -32,6 +33,7 @@ export const AppRouter = () => {
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/register" element={<RegisterPage />} />
         <Route path="/auth/olvide-contrasena" element={<OlvideContrasenaPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/auth/pages/RegisterOperatorPage" element={<RegisterOperadorPage />} />
         <Route path="/landingbkoffice" element={<LandingBkOfficePage />} />
 
