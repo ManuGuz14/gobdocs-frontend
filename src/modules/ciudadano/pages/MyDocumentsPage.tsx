@@ -39,13 +39,14 @@ export const MyDocumentsPage = () => {
           const data = await res.json();
           const solicitudes = Array.isArray(data) ? data : data.solicitudes || [];
 
-          // 🔥 EXTRAER DOCUMENTOS DE TODAS LAS SOLICITUDES
           const docs = solicitudes.flatMap((sol: any) =>
             (sol.documentos || []).map((doc: any) => ({
               ...doc,
               solicitudId: sol.Numero_Solicitud,
             }))
           );
+
+          
 
           setDocuments(docs);
         }
@@ -119,13 +120,20 @@ export const MyDocumentsPage = () => {
                         Solicitud #{doc.solicitudId}
                       </p>
 
-                      <a
-                        href={`${import.meta.env.VITE_REACT_APP_BACKEND}/${doc.Url_Archivo}`}
-                        target="_blank"
-                        className="w-full border-2 border-[#1a2b5e] text-[#1a2b5e] py-2 px-4 rounded-full font-medium hover:bg-[#1a2b5e] hover:text-white transition text-sm inline-block"
+                      {/* 🔥 BOTÓN CORRECTO */}
+                      <button
+                        onClick={() => {
+                          if (!doc.url) {
+                            alert("Este documento no está disponible aún.");
+                            return;
+                          }
+
+                          window.open(doc.url, "_blank");
+                        }}
+                        className="w-full border-2 border-[#1a2b5e] text-[#1a2b5e] py-2 px-4 rounded-full font-medium hover:bg-[#1a2b5e] hover:text-white transition text-sm"
                       >
-                        Ver PDF
-                      </a>
+                        Ver documento
+                      </button>
                     </div>
                   </div>
                 ))}
