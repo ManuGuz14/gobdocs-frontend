@@ -127,7 +127,7 @@ export const VerSolicitudBkOfficePage = () => {
       const token = localStorage.getItem("token");
 
       const res = await fetch(`${API_URL}/solicitudes/${id}/rechazar`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
