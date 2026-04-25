@@ -62,6 +62,22 @@ export const CreateFormularioPage = () => {
       return;
     }
 
+    if (campos.length === 0) {
+      alert("Agrega al menos un campo");
+      return;
+    }
+
+    const payload = {
+      TipoDocumento_ID: Number(tipoDocumentoId),
+      nombre: "Formulario dinámico", // 🔥 puedes hacerlo input luego
+      descripcion: "Formulario generado desde admin",
+      Estructura: {
+        campos,
+      },
+    };
+
+    console.log("🚀 PAYLOAD ENVIADO:", payload);
+
     try {
       const res = await fetch(`${API_URL}/formularios`, {
         method: "POST",
@@ -69,21 +85,24 @@ export const CreateFormularioPage = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          tipoDocumentoId: Number(tipoDocumentoId),
-          formDefinition: {
-            campos,
-          },
-        }),
+        body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error("Error creando formulario");
+      const data = await res.json();
+
+      console.log("📩 RESPONSE BACKEND:", data);
+
+      if (!res.ok) {
+        alert(data.message || "Error creando formulario");
+        return;
+      }
 
       alert("Formulario creado 🔥");
       navigate("/admin/formularios");
+
     } catch (err) {
       console.error(err);
-      alert("Error al crear formulario");
+      alert("Error inesperado");
     }
   };
 
