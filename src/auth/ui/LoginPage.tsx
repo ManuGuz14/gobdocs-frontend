@@ -10,7 +10,6 @@ export default function LoginPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     // placeholder: perform login
-    console.log('login', { user, password });
   }
 
   return (
