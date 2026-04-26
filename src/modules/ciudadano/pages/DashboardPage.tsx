@@ -82,7 +82,7 @@ export const DashboardPage = () => {
           </div>
 
           {/* 🔥 IMAGEN FULL SIZE CORREGIDA */}
-          <div className="hidden lg:flex absolute right-0 bottom-0 h-full w-[45%] items-end justify-end">
+          <div className="hidden lg:flex absolute right-0 bottom-0 h-full w-[75%] items-end justify-end">
             <img
               src={tiguerepensando}
               alt=""
@@ -95,9 +95,8 @@ export const DashboardPage = () => {
       {/* BENEFICIOS */}
       <div
         ref={beneficiosRef}
-        className={`bg-white py-24 px-6 md:px-16 transition-all duration-700 ${
-          visibleSections.beneficios ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-        }`}
+        className={`bg-white py-24 px-6 md:px-16 transition-all duration-700 ${visibleSections.beneficios ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
       >
         <h2 className="text-4xl font-bold text-center text-gobdocs-primary mb-16">
           Diseñado para simplificar todo
@@ -122,9 +121,8 @@ export const DashboardPage = () => {
       {/* IA */}
       <div
         ref={iaRef}
-        className={`grid md:grid-cols-2 items-center bg-[#f9fafc] py-20 px-6 md:px-16 transition-all duration-700 ${
-          visibleSections.ia ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-        }`}
+        className={`grid md:grid-cols-2 items-center bg-[#f9fafc] py-20 px-6 md:px-16 transition-all duration-700 ${visibleSections.ia ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
       >
         <div className="relative h-[450px] rounded-3xl overflow-hidden shadow-xl">
           <img src={tiguereholding} alt="" className="w-full h-full object-cover" />
@@ -150,9 +148,8 @@ export const DashboardPage = () => {
       {/* STEPS */}
       <div
         ref={stepsRef}
-        className={`bg-white py-24 px-6 md:px-16 text-center transition-all duration-700 ${
-          visibleSections.steps ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-        }`}
+        className={`bg-white py-24 px-6 md:px-16 text-center transition-all duration-700 ${visibleSections.steps ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
       >
         <h2 className="text-4xl font-bold text-gobdocs-primary mb-16">
           Cómo funciona
@@ -177,9 +174,8 @@ export const DashboardPage = () => {
       {/* CTA */}
       <div
         ref={ctaRef}
-        className={`bg-[#0f1c3f] text-white text-center py-24 px-6 transition-all duration-700 ${
-          visibleSections.cta ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-        }`}
+        className={`bg-[#0f1c3f] text-white text-center py-24 px-6 transition-all duration-700 ${visibleSections.cta ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
       >
         <h2 className="text-4xl md:text-5xl font-bold mb-6">
           Empieza hoy mismo
