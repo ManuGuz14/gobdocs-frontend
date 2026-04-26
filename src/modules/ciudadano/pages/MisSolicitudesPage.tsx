@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from '../../../shared/layouts/DashboardLayout';
-import { Search } from 'lucide-react';
+import { Search, AlertTriangle, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const MisSolicitudesPage = () => {
@@ -8,45 +8,85 @@ export const MisSolicitudesPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // 🔥 modal state
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [canceling, setCanceling] = useState(false);
+
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchMisSolicitudes = async () => {
-      try {
-        const API_URL =
-          import.meta.env.VITE_REACT_APP_BACKEND ||
+  const API_URL =
+    import.meta.env.VITE_REACT_APP_BACKEND ||
           "https://gobdocs-backend.up.railway.app";
-        const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-        const res = await fetch(`${API_URL}/solicitudes/mis-solicitudes`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  const fetchMisSolicitudes = async () => {
+    try {
+      const res = await fetch(`${API_URL}/solicitudes/mis-solicitudes`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        if (res.ok) {
-          const data = await res.json();
-          const dataArray = Array.isArray(data) ? data : data.solicitudes || [];
-          setSolicitudes(dataArray);
-        }
-      } catch (error) {
-        console.error("Error fetching mis solicitudes:", error);
-      } finally {
-        setLoading(false);
+      if (res.ok) {
+        const data = await res.json();
+        const dataArray = Array.isArray(data) ? data : data.solicitudes || [];
+        setSolicitudes(dataArray);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching mis solicitudes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchMisSolicitudes();
   }, []);
 
-  // Filter logic
+  // 🔥 abrir modal
+  const openCancelModal = (id: number) => {
+    setSelectedId(id);
+    setShowCancelModal(true);
+  };
+
+  // 🔥 confirmar cancelación
+  const handleConfirmCancel = async () => {
+    if (!selectedId) return;
+
+    try {
+      setCanceling(true);
+
+      const res = await fetch(`${API_URL}/solicitudes/${selectedId}/cancelar`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error();
+
+      setShowCancelModal(false);
+      setSelectedId(null);
+
+      // refresh
+      fetchMisSolicitudes();
+    } catch (err) {
+      console.error(err);
+      alert("Error cancelando solicitud");
+    } finally {
+      setCanceling(false);
+    }
+  };
+
   const filteredSolicitudes = solicitudes.filter((item) => {
     const searchString = `${item.Numero_Solicitud || ''} ${item.Estado || ''}`.toLowerCase();
     return searchString.includes(searchTerm.toLowerCase());
   });
 
   return (
+    <>
     <DashboardLayout>
       <div className="min-h-[80vh] flex flex-col">
 
@@ -90,6 +130,11 @@ export const MisSolicitudesPage = () => {
                   ? new Date(item.Fecha_Emision).toLocaleDateString()
                   : "Fecha no disponible";
 
+                const estado = (item.Estado || "").toUpperCase();
+
+                const puedePagar = estado === "PENDIENTE";
+                const puedeCancelar = estado === "PENDIENTE";
+
                 return (
                   <div
                     key={id}
@@ -100,33 +145,54 @@ export const MisSolicitudesPage = () => {
                       <h3 className="font-bold text-lg text-gobdocs-primary">
                         Solicitud #{item.Numero_Solicitud || index + 1}
                       </h3>
+
                       <p className="text-gray-500 text-sm mt-1">
                         Fecha: {fecha}
                       </p>
 
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-3 uppercase tracking-wider ${
-                          item.Estado === "APROBADA"
+                          estado === "APROBADA"
                             ? "bg-green-100 text-green-700"
-                            : item.Estado === "RECHAZADA"
+                            : estado === "RECHAZADA"
                             ? "bg-red-100 text-red-700"
+                            : estado === "CANCELADA"
+                            ? "bg-gray-200 text-gray-600"
                             : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
-                        {item.Estado || "PENDIENTE"}
+                        {estado || "PENDIENTE"}
                       </span>
                     </div>
 
                     <div
-                      className="flex sm:flex-col gap-2"
-                      onClick={(e) => e.stopPropagation()} // 🔥 evita doble click trigger
+                      className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <button
                         onClick={() => navigate(`/portal/mi-solicitud/${id}`)}
-                        className="px-5 py-2 w-full bg-blue-50 text-blue-600 border border-blue-100 rounded-lg font-medium hover:bg-blue-100 transition"
+                        className="px-4 py-2 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg font-medium hover:bg-blue-100 transition"
                       >
                         Ver detalles
                       </button>
+
+                      {puedePagar && (
+                        <button
+                          onClick={() => navigate(`/portal/pago/${id}`)}
+                          className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
+                        >
+                          Pagar ahora
+                        </button>
+                      )}
+
+                      {puedeCancelar && (
+                        <button
+                          onClick={() => openCancelModal(id)}
+                          className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition"
+                        >
+                          Cancelar
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -144,5 +210,52 @@ export const MisSolicitudesPage = () => {
         </div>
       </div>
     </DashboardLayout>
+
+    {/* 🔥 MODAL CONFIRMACIÓN */}
+    {showCancelModal && (
+      <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+
+          <button
+            onClick={() => setShowCancelModal(false)}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+          >
+            <X size={20} />
+          </button>
+
+          <div className="text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <AlertTriangle size={32} className="text-red-500" />
+            </div>
+
+            <h3 className="text-xl font-bold text-gray-800 mb-2">
+              ¿Cancelar solicitud?
+            </h3>
+
+            <p className="text-gray-500 text-sm mb-8">
+              Esta acción cancelará tu solicitud pendiente. Podrás crear una nueva si lo deseas.
+            </p>
+
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50"
+              >
+                Volver
+              </button>
+
+              <button
+                onClick={handleConfirmCancel}
+                disabled={canceling}
+                className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50"
+              >
+                {canceling ? "Cancelando..." : "Sí, cancelar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 };

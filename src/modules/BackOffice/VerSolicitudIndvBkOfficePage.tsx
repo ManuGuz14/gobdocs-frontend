@@ -23,6 +23,9 @@ export const VerSolicitudBkOfficePage = () => {
   const [rejectComment, setRejectComment] = useState("");
   const [rejecting, setRejecting] = useState(false);
 
+  const tipoDocumento =
+  solicitud?.formulario?.tipoDocumento?.Nombre;
+
   useEffect(() => {
     const fetchSolicitud = async () => {
       try {
@@ -178,6 +181,8 @@ export const VerSolicitudBkOfficePage = () => {
     );
   }
 
+
+
   return (
     <>
     <BackofficeLayout>
@@ -194,6 +199,7 @@ export const VerSolicitudBkOfficePage = () => {
                 <h2 className="text-xl font-semibold">
                   Solicitud #{solicitud.Numero_Solicitud || id}
                 </h2>
+                  
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
                     solicitud.Estado === "APROBADA"
@@ -206,6 +212,10 @@ export const VerSolicitudBkOfficePage = () => {
                   {solicitud.Estado || "PENDIENTE"}
                 </span>
               </div>
+
+              <p className="text-sm text-gray-500 mt-1">
+                    Tipo: {tipoDocumento || "No disponible"}
+              </p>
 
               <p className="text-gray-600 text-sm mb-6">
                 Información del ciudadano y la solicitud.

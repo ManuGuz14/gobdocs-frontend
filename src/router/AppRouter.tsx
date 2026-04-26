@@ -20,6 +20,15 @@ import { DocumentosEmitidosPage } from "../modules/BackOffice/DocumentosEmitidos
 import { PagoExitosoPage } from '../modules/ciudadano/pages/PagoExitosoPage.tsx';
 import { SolicitudDetailPage } from '../modules/ciudadano/pages/MiSolicitudDetailPage';
 import { PaymentPage } from '../modules/ciudadano/pages/PaymentPage.tsx';
+import { AdminDashboardPage } from '../modules/Admin/pages/AdminDashboardPage';
+import { BulkUploadPage } from '../modules/Admin/pages/BulkUploadPage';
+import { CreateInstitucionPage } from '../modules/Admin/pages/CreateInstitucionPage';
+import { CreateDocumentTypePage } from '../modules/Admin/pages/CreateDocumentTypePage';
+import { AsignarTarifasPage } from '../modules/Admin/pages/AsignarTarifasPage';
+import { FormulariosPage } from '../modules/Admin/pages/Formularios/FormulariosPage.tsx';
+import { CreateFormularioPage } from '../modules/Admin/pages/Formularios/CreateFormulariosPage.tsx';
+import { EditFormularioPage } from '../modules/Admin/pages/Formularios/EditFormularioPage.tsx';
+import { ViewFormularioPage } from '../modules/Admin/pages/Formularios/ViewFormularioPage.tsx';
 
 export const AppRouter = () => {
   const location = useLocation();
@@ -46,6 +55,7 @@ export const AppRouter = () => {
         <Route path="/portal/solicitudes" element={<MisSolicitudesPage />} />
         <Route path="/portal/mi-solicitud/:id" element={<SolicitudDetailPage />} />
         <Route path="/portal/pago/:numeroSolicitud" element={<PaymentPage />} />
+        <Route path="/portal/pago/multiple" element={<PaymentPage />} />
         <Route path="/portal/pago-exitoso" element={<PagoExitosoPage />} />
 
         {/* Backoffice */}
@@ -56,6 +66,17 @@ export const AppRouter = () => {
         <Route path="/backoffice/perfil" element={<ProfileOperatorPage />} />
         <Route path="/backoffice/documentos" element={<DocumentosEmitidosPage />} />
 
+        {/* Admin */}
+        <Route path="/admin" element={<AdminDashboardPage />} />
+        <Route path="/admin/carga-masiva" element={<BulkUploadPage />} />
+        <Route path="/admin/instituciones" element={<CreateInstitucionPage />} />
+        <Route path="/admin/tipos-documento" element={<CreateDocumentTypePage />} />
+        <Route path="/admin/tarifas" element={<AsignarTarifasPage />} />
+
+        <Route path="/admin/formularios" element={<FormulariosPage />} />
+        <Route path="/admin/formularios/create" element={<CreateFormularioPage />} />
+        <Route path="/admin/formularios/edit/:id" element={<EditFormularioPage />} />
+        <Route path="/admin/formularios/:id" element={<ViewFormularioPage />} />
         <Route path="*" element={<div>404 - No encontrado</div>} />
       </Routes>
     </div>

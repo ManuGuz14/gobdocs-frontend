@@ -102,7 +102,7 @@ export const CreateSolicitudPage = () => {
         const data = await res.json();
         const solicitudes = Array.isArray(data) ? data : data.solicitudes || [];
 
-        const estadosFinalizados = ["RECHAZADA", "CANCELADA"];
+        const estadosFinalizados = ["RECHAZADA", "CANCELADA", "APROBADA"];
 
         const yaSolicitado = solicitudes.some((sol: any) => {
           const estado = (sol.Estado || "").toUpperCase();
@@ -177,7 +177,10 @@ export const CreateSolicitudPage = () => {
       respuestas: formData,
       detalles: detalles,
       tarifas: tarifas,
-      nombre: form?.Nombre || `Documento ${tipoDocumentoId}`,
+      nombre:
+      form?.tipoDocumento?.Nombre ||
+      form?.Nombre ||
+      `Documento ${tipoDocumentoId}`,
       TipoDocumento_ID: tipoDocumentoId,
     };
 
