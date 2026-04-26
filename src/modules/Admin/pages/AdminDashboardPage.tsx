@@ -57,22 +57,34 @@ export const AdminDashboardPage = () => {
           Authorization: `Bearer ${token}`,
         };
 
-        const [solRes, usrRes, instRes, docRes] = await Promise.allSettled([
-          fetch(`${API_URL}/solicitudes`, { headers }),
-          fetch(`${API_URL}/usuarios`, { headers }),
+        const [solRes, instRes, docRes] = await Promise.allSettled([
+          fetch(`${API_URL}/solicitudes/institucion`, { headers }),
           fetch(`${API_URL}/institution`, { headers }),
           fetch(`${API_URL}/document-type`, { headers }),
         ]);
 
+        let solData: any[] = [];
         if (solRes.status === "fulfilled" && solRes.value.ok) {
           const data = await solRes.value.json();
-          setSolicitudes(Array.isArray(data) ? data : data.solicitudes || []);
+          solData = Array.isArray(data) ? data : data.solicitudes || [];
+          setSolicitudes(solData);
         }
 
-        if (usrRes.status === "fulfilled" && usrRes.value.ok) {
-          const data = await usrRes.value.json();
-          setUsuarios(Array.isArray(data) ? data : data.usuarios || []);
-        }
+        // Extraer usuarios únicos de las solicitudes (cada solicitud tiene .usuario)
+        const userMap = new Map<string, any>();
+        solData.forEach((s: any) => {
+          if (s.usuario && (s.usuario.Usuario_ID || s.usuario.id)) {
+            const uid = s.usuario.Usuario_ID || s.usuario.id;
+            if (!userMap.has(uid)) {
+              userMap.set(uid, {
+                ...s.usuario,
+                // Usar la fecha de la solicitud como referencia si no tiene fecha de creación
+                createdAt: s.usuario.createdAt || s.usuario.Fecha_Creacion || s.Fecha_Solicitud,
+              });
+            }
+          }
+        });
+        setUsuarios(Array.from(userMap.values()));
 
         if (instRes.status === "fulfilled" && instRes.value.ok) {
           const data = await instRes.value.json();
@@ -153,18 +165,22 @@ export const AdminDashboardPage = () => {
   }
 
   solicitudes.forEach((s) => {
-    if (s.Fecha_Emision) {
-      const fechaStr = new Date(s.Fecha_Emision).toISOString().split("T")[0];
+    const fecha = s.Fecha_Emision || s.Fecha_Solicitud || s.createdAt;
+    if (fecha) {
+      const fechaStr = new Date(fecha).toISOString().split("T")[0];
       const found = last14Days.find((d) => d.date === fechaStr);
       if (found) found.solicitudes += 1;
     }
   });
 
-  // Solicitudes por institución
+  // Solicitudes por institución (data comes from tipoDocumento.institucion)
   const instCount: Record<string, number> = {};
   solicitudes.forEach((s) => {
     const instName =
-      s.institucion?.Nombre || `Inst #${s.Institucion_ID || "?"}`;
+      s.institucion?.Nombre ||
+      s.tipoDocumento?.institucion?.Nombre ||
+      s.Nombre_Documento ||
+      `Inst #${s.Institucion_ID || "?"}`;
     instCount[instName] = (instCount[instName] || 0) + 1;
   });
 
