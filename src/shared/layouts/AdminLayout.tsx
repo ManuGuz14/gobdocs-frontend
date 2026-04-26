@@ -85,6 +85,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               </div>
             </div>
 
+            {/* REPORTES */}
+            <Link
+              to="/admin/reportes"
+              className="hidden md:flex items-center gap-1 hover:text-blue-200 transition-colors"
+            >
+              <span className="font-medium">Reportes</span>
+            </Link>
+
             {/* USER */}
             <div className="relative group pl-4 border-l border-white/20 ml-4">
               <div className="bg-white/10 p-2 rounded-full hover:bg-white/20 cursor-pointer transition-colors">
