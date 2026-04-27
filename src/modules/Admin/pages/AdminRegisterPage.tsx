@@ -8,6 +8,8 @@ import LoginGradientVector2 from '../../../assets/Login/LoginGradientVector2.png
 import { Input } from '../../../shared/ui/Input';
 import { Button } from '../../../shared/ui/Button';
 
+const GOBDOCS_ID = "a8f98d65-1c1c-490e-9cb1-9829777e5b60";
+
 export const AdminRegisterPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -20,7 +22,7 @@ export const AdminRegisterPage = () => {
     email: emailFromUrl,
     password: '',
     confirmPassword: '',
-    institucionId: ''
+    institucionId: GOBDOCS_ID
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -33,6 +35,8 @@ export const AdminRegisterPage = () => {
       [name]: name === 'cedula' ? formatCedula(value) : value
     });
   };
+
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,6 +87,8 @@ export const AdminRegisterPage = () => {
       setIsLoading(false);
     }
   };
+
+  
 
   return (
     <AuthLayout
@@ -137,15 +143,6 @@ export const AdminRegisterPage = () => {
             maxLength={13}
             value={formData.cedula}
             onChange={handleChange}
-          />
-          <Input
-            label="ID Institución"
-            name="institucionId"
-            placeholder="Opcional"
-            type="text"
-            value={formData.institucionId}
-            onChange={handleChange}
-            required={false}
           />
         </div>
 
