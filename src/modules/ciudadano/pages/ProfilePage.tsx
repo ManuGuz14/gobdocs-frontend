@@ -79,20 +79,6 @@ export const ProfilePage = () => {
                                 </div>
                             </div>
 
-                            {/* Input: Cédula */}
-                            <div>
-                                <label className="block text-gobdocs-primary font-bold mb-2">Tu Cédula:</label>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        placeholder="000-000000-0"
-                                        value={user?.cedula || ''}
-                                        className="w-full border-2 border-gray-300 rounded-full py-3 px-6 text-gray-400 bg-gray-50 focus:outline-none"
-                                        readOnly
-                                    />
-                                </div>
-                            </div>
-
                             {/* Input: Email */}
                             <div>
                                 <label className="block text-gobdocs-primary font-bold mb-2">Tu email:</label>
