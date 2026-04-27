@@ -125,9 +125,9 @@ export const BackofficeLayout: React.FC<BackofficeLayoutProps> = ({ children }) 
         {showBackButton && (
           <button
             onClick={() => navigate(-1)}
-            className="absolute left-40 top-2 z-20 flex items-center gap-2 text-white hover:text-gray-400"
+            className="absolute left-4 md:left-10 top-6 z-20 flex items-center gap-2 text-white bg-black/40 hover:bg-black/60 px-4 py-2 rounded-full backdrop-blur-md transition-all shadow-md font-medium text-sm border border-white/10"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
             <span>Volver</span>
           </button>
         )}
