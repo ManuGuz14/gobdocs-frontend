@@ -47,6 +47,7 @@ export const AppRouter = () => {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/auth/pages/RegisterOperatorPage" element={<RegisterOperadorPage />} />
         <Route path="/admin/adminregister" element={<AdminRegisterPage />} />
+        <Route path="/registro-admin" element={<AdminRegisterPage />} />
         <Route path="/landingbkoffice" element={<LandingBkOfficePage />} />
 
         {/* Ciudadano */}
