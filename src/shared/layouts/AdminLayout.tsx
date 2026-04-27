@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { User, ChevronDown, ArrowLeft, Shield } from "lucide-react";
+import { ChevronDown, ArrowLeft, Shield } from "lucide-react";
 import logo from "../../assets/GobDocsLogo.png";
 
 interface AdminLayoutProps {
@@ -50,12 +50,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0
                 transition-all duration-300 z-50">
                 <div className="bg-white rounded-xl shadow-xl py-2 border border-gray-100">
-                  <Link
-                    to="/admin/usuarios"
-                    className="block px-6 py-3 text-sm text-[#1a2b5e] hover:bg-blue-50"
-                  >
-                    Usuarios
-                  </Link>
+
+                  {/* ❌ USUARIOS ELIMINADO */}
+
                   <Link
                     to="/admin/instituciones"
                     className="block px-6 py-3 text-sm text-[#1a2b5e] hover:bg-blue-50"
@@ -80,7 +77,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                   >
                     Asignar tarifas
                   </Link>
+
                   <div className="border-t my-1"></div>
+
                   <Link
                     to="/admin/carga-masiva"
                     className="block px-6 py-3 text-sm text-[#1a2b5e] hover:bg-blue-50"
@@ -91,13 +90,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               </div>
             </div>
 
-            {/* REPORTES */}
-            <Link
-              to="/admin/reportes"
-              className="hidden md:flex items-center gap-1 hover:text-blue-200 transition-colors"
-            >
-              <span className="font-medium">Reportes</span>
-            </Link>
+            {/* ❌ REPORTES ELIMINADO */}
 
             {/* USER */}
             <div className="relative group pl-4 border-l border-white/20 ml-4">
