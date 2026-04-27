@@ -260,9 +260,6 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
           <X size={20} />
         </button>
         <span className="font-bold tracking-wide">CHAT</span>
-        <button className="hover:bg-white/20 p-1 rounded-full">
-          <MoreHorizontal size={20} />
-        </button>
       </div>
 
       {/* BODY */}
