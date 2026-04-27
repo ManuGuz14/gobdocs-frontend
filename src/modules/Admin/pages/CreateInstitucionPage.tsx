@@ -2,16 +2,15 @@ import React, { useState } from "react";
 import { AdminLayout } from "../../../shared/layouts/AdminLayout";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Building2, Loader2, CheckCircle } from "lucide-react";
+import { Building2, Loader2, CheckCircle, ImageIcon } from "lucide-react";
 
 export const CreateInstitucionPage = () => {
   const navigate = useNavigate();
 
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const [direccion, setDireccion] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [email, setEmail] = useState("");
+  const [logo, setLogo] = useState<File | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
   const [created, setCreated] = useState<any>(null);
 
@@ -32,19 +31,21 @@ export const CreateInstitucionPage = () => {
     setIsLoading(true);
 
     try {
+      const formData = new FormData();
+      formData.append("nombre", nombre.trim());
+      if (descripcion.trim()) {
+        formData.append("descripcion", descripcion.trim());
+      }
+      if (logo) {
+        formData.append("logo", logo); // 👈 clave importante (debe coincidir con backend)
+      }
+
       const res = await fetch(`${API_URL}/institution/create`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // ⚠️ NO pongas Content-Type aquí
         },
-        body: JSON.stringify({
-          nombre: nombre.trim(),
-          descripcion: descripcion.trim() || undefined,
-          direccion: direccion.trim() || undefined,
-          telefono: telefono.trim() || undefined,
-          email: email.trim() || undefined,
-        }),
+        body: formData,
       });
 
       const data = await res.json();
@@ -73,9 +74,7 @@ export const CreateInstitucionPage = () => {
   const handleReset = () => {
     setNombre("");
     setDescripcion("");
-    setDireccion("");
-    setTelefono("");
-    setEmail("");
+    setLogo(null);
     setCreated(null);
   };
 
@@ -106,7 +105,7 @@ export const CreateInstitucionPage = () => {
                   </div>
                 </div>
 
-                {/* NOMBRE * */}
+                {/* NOMBRE */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nombre de la institución <span className="text-red-500">*</span>
@@ -135,45 +134,33 @@ export const CreateInstitucionPage = () => {
                   />
                 </div>
 
-                {/* DIRECCION */}
+                {/* LOGO */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Dirección
+                    Logo de la institución
                   </label>
-                  <input
-                    type="text"
-                    value={direccion}
-                    onChange={(e) => setDireccion(e.target.value)}
-                    placeholder="Ej: Av. Máximo Gómez #2, Santo Domingo"
-                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-400 transition"
-                  />
-                </div>
 
-                {/* TELEFONO + EMAIL */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Teléfono
-                    </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-purple-400 transition cursor-pointer">
                     <input
-                      type="tel"
-                      value={telefono}
-                      onChange={(e) => setTelefono(e.target.value)}
-                      placeholder="809-555-0000"
-                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-400 transition"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setLogo(e.target.files[0]);
+                        }
+                      }}
+                      className="hidden"
+                      id="logoUpload"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email
+
+                    <label htmlFor="logoUpload" className="cursor-pointer">
+                      <div className="flex flex-col items-center gap-2">
+                        <ImageIcon size={28} className="text-gray-400" />
+                        <p className="text-sm text-gray-500">
+                          {logo ? logo.name : "Haz clic para subir una imagen"}
+                        </p>
+                      </div>
                     </label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="contacto@institucion.gob.do"
-                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-400 transition"
-                    />
                   </div>
                 </div>
 
@@ -197,7 +184,6 @@ export const CreateInstitucionPage = () => {
                 </button>
               </form>
             ) : (
-              /* ÉXITO */
               <div className="text-center py-6">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
                   <CheckCircle size={32} className="text-green-500" />
@@ -209,12 +195,6 @@ export const CreateInstitucionPage = () => {
                 <p className="text-gray-500 text-sm mb-6">
                   La institución <strong>{nombre}</strong> ha sido registrada exitosamente.
                 </p>
-
-                {(created.Institucion_ID || created.id) && (
-                  <p className="text-xs text-gray-400 mb-6">
-                    ID: {created.Institucion_ID || created.id}
-                  </p>
-                )}
 
                 <div className="flex gap-3 justify-center">
                   <button
