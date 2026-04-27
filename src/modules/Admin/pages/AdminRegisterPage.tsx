@@ -1,0 +1,137 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { formatCedula } from '../../../shared/utils/formatCedula';
+import { AuthLayout } from '../../../shared/layouts/AuthLayout';
+import LoginGradientVector from '../../../assets/Login/LoginGradientVector.png';
+import LoginGradientVector2 from '../../../assets/Login/LoginGradientVector2.png';
+import { Input } from '../../../shared/ui/Input';
+import { Button } from '../../../shared/ui/Button';
+
+export const AdminRegisterPage = () => {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    nombre: 'Leonardo',
+    apellido: 'Perozo',
+    cedula: '402-0880120-5',
+    email: 'leonardo@admin.com',
+    password: 'Password123!',
+    institucionId: ''
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: name === 'cedula' ? formatCedula(value) : value
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    // Aquí iría la lógica de registro de administrador en el backend.
+    // Por ahora, simulamos un pequeño retraso.
+    setTimeout(() => {
+      setIsLoading(false);
+      toast.success('Admin registrado exitosamente');
+      navigate('/admin');
+    }, 1000);
+  };
+
+  return (
+    <AuthLayout
+      customBackground={
+        <>
+          <img
+            src={LoginGradientVector}
+            alt="Login gradient"
+            className="absolute left-[85%] -translate-x-1/2 top-[3rem] w-70 opacity-95 pointer-events-none -z-10"
+          />
+          <img
+            src={LoginGradientVector2}
+            alt="Login gradient 2"
+            className="absolute left-[20%] -translate-x-1/2 top-[20rem] w-70 opacity-95 pointer-events-none -z-10"
+          />
+        </>
+      }
+    >
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-semibold text-gobdocs-primary">Registro de Admin</h2>
+        <p className="text-gray-500 text-sm mt-1">
+          Verifica los datos del nuevo administrador
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label="Nombre"
+            name="nombre"
+            placeholder="Leonardo"
+            type="text"
+            value={formData.nombre}
+            onChange={handleChange}
+          />
+          <Input
+            label="Apellido"
+            name="apellido"
+            placeholder="Perozo"
+            type="text"
+            value={formData.apellido}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label="Cédula"
+            name="cedula"
+            placeholder="402-0880120-5"
+            type="text"
+            maxLength={13}
+            value={formData.cedula}
+            onChange={handleChange}
+          />
+          <Input
+            label="ID Institución"
+            name="institucionId"
+            placeholder="Opcional"
+            type="text"
+            value={formData.institucionId}
+            onChange={handleChange}
+            required={false}
+          />
+        </div>
+
+        <Input
+          label="Correo electrónico"
+          name="email"
+          placeholder="leonardo@admin.com"
+          type="email"
+          value={formData.email}
+          onChange={handleChange}
+        />
+
+        <Input
+          label="Contraseña"
+          name="password"
+          placeholder="••••••••"
+          type="password"
+          value={formData.password}
+          onChange={handleChange}
+        />
+
+        <div className="mt-8">
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? 'Registrando...' : 'Registrar Admin'}
+          </Button>
+        </div>
+      </form>
+    </AuthLayout>
+  );
+};
