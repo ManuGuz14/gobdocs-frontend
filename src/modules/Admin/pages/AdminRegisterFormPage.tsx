@@ -38,7 +38,7 @@ export const AdminRegisterFormPage = () => {
       }
 
       toast.success('Correo enviado exitosamente');
-      navigate('/admin/adminregister');
+      navigate('/admin');
     } catch (error: any) {
       toast.error(error.message || 'Error de conexión con el servidor');
     } finally {
