@@ -46,6 +46,7 @@ export const AppRouter = () => {
         <Route path="/auth/olvide-contrasena" element={<OlvideContrasenaPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/auth/pages/RegisterOperatorPage" element={<RegisterOperadorPage />} />
+        <Route path="/admin/adminregister" element={<AdminRegisterPage />} />
         <Route path="/landingbkoffice" element={<LandingBkOfficePage />} />
 
         {/* Ciudadano */}
@@ -75,7 +76,6 @@ export const AppRouter = () => {
         <Route path="/admin/tipos-documento" element={<CreateDocumentTypePage />} />
         <Route path="/admin/tarifas" element={<AsignarTarifasPage />} />
         <Route path="/admin/adminregisterform" element={<AdminRegisterFormPage />} />
-        <Route path="/admin/adminregister" element={<AdminRegisterPage />} />
 
         <Route path="/admin/formularios" element={<FormulariosPage />} />
         <Route path="/admin/formularios/create" element={<CreateFormularioPage />} />
