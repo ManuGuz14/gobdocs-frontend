@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { formatCedula } from '../../shared/utils/formatCedula';
 
 // Importamos el AuthLayout, las imágenes y tus componentes de UI
 import { AuthLayout } from '../../shared/layouts/AuthLayout';
@@ -185,7 +186,8 @@ export const RegisterPage = () => {
           placeholder="001-1234567-8"
           type="text"
           value={cedula}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCedula(e.target.value)}
+          maxLength={13}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCedula(formatCedula(e.target.value))}
         />
 
         <Input

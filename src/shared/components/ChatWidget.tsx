@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, MoreHorizontal, Send, Sparkles, User, HelpCircle, ChevronRight } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { LoadingScreen } from './LoadingScreen';
+import { formatCedula } from '../utils/formatCedula';
 
 interface ChatWidgetProps {
   onClose: () => void;
@@ -202,9 +203,10 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
   };
 
   const handleInputChange = (name: string, value: any) => {
+    const isCedulaField = name.toLowerCase().includes("cedula") || name.toLowerCase().includes("cédula");
     setFormData((prev: any) => ({
       ...prev,
-      [name]: value,
+      [name]: isCedulaField ? formatCedula(value) : value,
     }));
   };
 
@@ -365,16 +367,21 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
             </div>
 
             <div className="pl-9 space-y-3">
-              {formFields.map((field: any, i: number) => (
-                <input
-                  key={i}
-                  placeholder={field.label}
-                  className="w-full border p-2 rounded"
-                  onChange={(e) =>
-                    handleInputChange(field.name, e.target.value)
-                  }
-                />
-              ))}
+              {formFields.map((field: any, i: number) => {
+                const isCedulaField = (field.name || "").toLowerCase().includes("cedula") || (field.label || "").toLowerCase().includes("cédula");
+                return (
+                  <input
+                    key={i}
+                    placeholder={isCedulaField ? "000-0000000-0" : field.label}
+                    className="w-full border p-2 rounded"
+                    maxLength={isCedulaField ? 13 : undefined}
+                    value={formData[field.name] || ""}
+                    onChange={(e) =>
+                      handleInputChange(field.name, e.target.value)
+                    }
+                  />
+                );
+              })}
             </div>
 
             {/* 💰 MONTO */}
