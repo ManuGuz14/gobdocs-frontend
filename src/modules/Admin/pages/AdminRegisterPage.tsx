@@ -12,15 +12,17 @@ export const AdminRegisterPage = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    nombre: 'Leonardo',
-    apellido: 'Perozo',
-    cedula: '402-0880120-5',
-    email: 'leonardo@admin.com',
-    password: 'Password123!',
+    nombre: '',
+    apellido: '',
+    cedula: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
     institucionId: ''
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const API_URL = import.meta.env.VITE_REACT_APP_BACKEND || 'https://gobdocs-backend.up.railway.app';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -32,15 +34,52 @@ export const AdminRegisterPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const { nombre, apellido, cedula, email, password, confirmPassword, institucionId } = formData;
+
+    if (!nombre || !apellido || !cedula || !email || !password || !confirmPassword) {
+      toast.warning('Por favor, completa todos los campos obligatorios.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error('Las contraseñas no coinciden.');
+      return;
+    }
+
     setIsLoading(true);
     
-    // Aquí iría la lógica de registro de administrador en el backend.
-    // Por ahora, simulamos un pequeño retraso.
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const response = await fetch(`${API_URL}/usuarios/registro-admin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre,
+          apellido,
+          cedula,
+          email,
+          password,
+          ...(institucionId ? { institucionId } : {})
+        }),
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        throw new Error('El servidor no devolvió un formato válido.');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al registrar administrador.');
+      }
+
       toast.success('Admin registrado exitosamente');
-      navigate('/admin');
-    }, 1000);
+      navigate('/auth/login');
+    } catch (error: any) {
+      toast.error(error.message || 'Error de conexión con el servidor.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -123,6 +162,15 @@ export const AdminRegisterPage = () => {
           placeholder="••••••••"
           type="password"
           value={formData.password}
+          onChange={handleChange}
+        />
+
+        <Input
+          label="Confirmar Contraseña"
+          name="confirmPassword"
+          placeholder="••••••••"
+          type="password"
+          value={formData.confirmPassword}
           onChange={handleChange}
         />
 
