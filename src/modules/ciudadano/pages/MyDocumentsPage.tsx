@@ -123,12 +123,12 @@ export const MyDocumentsPage = () => {
                       {/* 🔥 BOTÓN CORRECTO */}
                       <button
                         onClick={() => {
-                          if (!doc.url) {
+                          if (!doc.Url_Archivo) {
                             alert("Este documento no está disponible aún.");
                             return;
                           }
 
-                          window.open(doc.url, "_blank");
+                          window.open(doc.Url_Archivo, "_blank");
                         }}
                         className="w-full border-2 border-[#1a2b5e] text-[#1a2b5e] py-2 px-4 rounded-full font-medium hover:bg-[#1a2b5e] hover:text-white transition text-sm"
                       >

@@ -37,7 +37,8 @@ export const ProfileOperatorPage = () => {
         const institutions = Array.isArray(data) ? data : data.data || [];
 
         const found = institutions.find(
-          (inst: any) => inst.Institucion_ID === Number(instId)
+          (inst: any) =>
+            String(inst.Institucion_ID) === String(instId)
         );
 
         if (found) setInstitutionName(found.Nombre);
@@ -191,11 +192,7 @@ export const ProfileOperatorPage = () => {
                 <input
                   type="text"
                   value={
-                    institutionName
-                      ? `${institutionName} (ID: ${instId})`
-                      : instId
-                        ? `Institución #${instId}`
-                        : "No asignada"
+                    institutionName || "Cargando institución..."
                   }
                   className="w-full border-2 border-gobdocs-primary/20 rounded-full py-3 px-6 text-gobdocs-primary font-semibold bg-blue-50 focus:outline-none"
                   readOnly

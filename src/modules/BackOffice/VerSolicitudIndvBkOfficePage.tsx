@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { BackofficeLayout } from "../../shared/layouts/BackOfficeLayout";
-import { FileText, User, IdCard, Upload, X, AlertTriangle } from "lucide-react";
+import { FileText, User, IdCard, Upload, X, AlertTriangle, BadgeCheck } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -23,8 +23,11 @@ export const VerSolicitudBkOfficePage = () => {
   const [rejectComment, setRejectComment] = useState("");
   const [rejecting, setRejecting] = useState(false);
 
+  // ✅ NUEVO: success modal
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
   const tipoDocumento =
-  solicitud?.formulario?.tipoDocumento?.Nombre;
+    solicitud?.formulario?.tipoDocumento?.Nombre;
 
   useEffect(() => {
     const fetchSolicitud = async () => {
@@ -34,8 +37,6 @@ export const VerSolicitudBkOfficePage = () => {
           "https://gobdocs-backend.up.railway.app";
         const token = localStorage.getItem("token");
 
-        // Assuming there isn't a direct GET /solicitudes/:id endpoint that we know of,
-        // we fetch all for the institution and find the one.
         const res = await fetch(`${API_URL}/solicitudes/institucion`, {
           headers: {
             "Content-Type": "application/json",
@@ -72,9 +73,7 @@ export const VerSolicitudBkOfficePage = () => {
 
   const handleAprobar = async () => {
     if (!file) {
-      alert(
-        "Por favor adjunta un documento para emitir y aprobar la solicitud."
-      );
+      toast.warning("Debes adjuntar un documento para aprobar.");
       return;
     }
 
@@ -100,15 +99,15 @@ export const VerSolicitudBkOfficePage = () => {
       });
 
       if (res.ok) {
-        alert("Solicitud aprobada y documento emitido correctamente.");
-        navigate("/landingbkoffice");
+        // ✅ MODAL en vez de alert
+        setShowSuccessModal(true);
       } else {
         const err = await res.json();
-        alert(`Error al aprobar: ${err.message || "Error desconocido"}`);
+        toast.error(err.message || "Error al aprobar");
       }
     } catch (error) {
       console.error("Error aprobando:", error);
-      alert("Ocurrió un error al aprobar la solicitud.");
+      toast.error("Ocurrió un error al aprobar la solicitud.");
     } finally {
       setSubmitting(false);
     }
@@ -180,7 +179,6 @@ export const VerSolicitudBkOfficePage = () => {
       </BackofficeLayout>
     );
   }
-
 
 
   return (
@@ -322,6 +320,35 @@ export const VerSolicitudBkOfficePage = () => {
         </div>
       </div>
     </BackofficeLayout>
+
+    {/* ========= MODAL APROBADO ========= */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center w-[350px]">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <BadgeCheck className="text-green-500" size={30} />
+            </div>
+
+            <h2 className="text-lg font-bold mb-2">
+              Solicitud aprobada
+            </h2>
+            <p className="text-gray-500 text-sm mb-6">
+              El documento fue emitido correctamente.
+            </p>
+
+            <button
+              onClick={() => {
+                setShowSuccessModal(false);
+                navigate("/landingbkoffice");
+              }}
+              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+            >
+              Continuar
+            </button>
+          </div>
+        </div>
+    )}
+
 
     {/* ========== MODAL: CONFIRMAR RECHAZO ========== */}
     {showRejectConfirm && (

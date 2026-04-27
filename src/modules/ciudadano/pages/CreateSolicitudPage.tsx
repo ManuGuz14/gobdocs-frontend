@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { formatCedula } from "../../../shared/utils/formatCedula";
 import { DashboardLayout } from "../../../shared/layouts/DashboardLayout";
 import { Input } from "../../../shared/ui/Input";
 import { Button } from "../../../shared/ui/Button";
@@ -129,9 +130,10 @@ export const CreateSolicitudPage = () => {
   /* ------------------ HANDLE CHANGE ------------------ */
 
   const handleChange = (name: string, value: any) => {
+    const isCedulaField = name.toLowerCase().includes("cedula") || name.toLowerCase().includes("cédula");
     setFormData((prev: any) => ({
       ...prev,
-      [name]: value,
+      [name]: isCedulaField ? formatCedula(value) : value,
     }));
   };
 
@@ -307,11 +309,16 @@ export const CreateSolicitudPage = () => {
               );
             }
 
+            const isCedulaField = (campo.name || "").toLowerCase().includes("cedula") || (campo.label || "").toLowerCase().includes("cédula");
+
             return (
               <Input
                 key={campo.name}
                 label={campo.label}
                 type={campo.type}
+                value={formData[campo.name] || ""}
+                maxLength={isCedulaField ? 13 : undefined}
+                placeholder={isCedulaField ? "000-0000000-0" : undefined}
                 onChange={(e: any) =>
                   handleChange(campo.name, e.target.value)
                 }

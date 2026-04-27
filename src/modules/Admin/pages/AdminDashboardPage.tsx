@@ -57,40 +57,53 @@ export const AdminDashboardPage = () => {
           Authorization: `Bearer ${token}`,
         };
 
-        const [solRes, instRes, docRes] = await Promise.allSettled([
-          fetch(`${API_URL}/solicitudes/institucion`, { headers }),
+        const [solRes, userRes, instRes, docRes] = await Promise.allSettled([
+          fetch(`${API_URL}/solicitudes`, { headers }),
+          fetch(`${API_URL}/usuarios`, { headers }), // 🔥 NUEVO
           fetch(`${API_URL}/institution`, { headers }),
           fetch(`${API_URL}/document-type`, { headers }),
         ]);
 
         let solData: any[] = [];
+
+        // ===== SOLICITUDES =====
         if (solRes.status === "fulfilled" && solRes.value.ok) {
           const data = await solRes.value.json();
           solData = Array.isArray(data) ? data : data.solicitudes || [];
           setSolicitudes(solData);
         }
 
-        // Extraer usuarios únicos de las solicitudes (cada solicitud tiene .usuario)
-        const userMap = new Map<string, any>();
-        solData.forEach((s: any) => {
-          if (s.usuario && (s.usuario.Usuario_ID || s.usuario.id)) {
-            const uid = s.usuario.Usuario_ID || s.usuario.id;
-            if (!userMap.has(uid)) {
-              userMap.set(uid, {
-                ...s.usuario,
-                // Usar la fecha de la solicitud como referencia si no tiene fecha de creación
-                createdAt: s.usuario.createdAt || s.usuario.Fecha_Creacion || s.Fecha_Solicitud,
-              });
+        // ===== USUARIOS (REAL) =====
+        if (userRes.status === "fulfilled" && userRes.value.ok) {
+          const data = await userRes.value.json();
+          setUsuarios(Array.isArray(data) ? data : []);
+        } else {
+          // 🔥 fallback (por si endpoint falla)
+          const userMap = new Map<string, any>();
+          solData.forEach((s: any) => {
+            if (s.usuario && (s.usuario.Usuario_ID || s.usuario.id)) {
+              const uid = s.usuario.Usuario_ID || s.usuario.id;
+              if (!userMap.has(uid)) {
+                userMap.set(uid, {
+                  ...s.usuario,
+                  createdAt:
+                    s.usuario.createdAt ||
+                    s.usuario.Fecha_Creacion ||
+                    s.Fecha_Solicitud,
+                });
+              }
             }
-          }
-        });
-        setUsuarios(Array.from(userMap.values()));
+          });
+          setUsuarios(Array.from(userMap.values()));
+        }
 
+        // ===== INSTITUCIONES =====
         if (instRes.status === "fulfilled" && instRes.value.ok) {
           const data = await instRes.value.json();
           setInstituciones(Array.isArray(data) ? data : []);
         }
 
+        // ===== TIPOS DOCUMENTO =====
         if (docRes.status === "fulfilled" && docRes.value.ok) {
           const data = await docRes.value.json();
           setTiposDocumento(Array.isArray(data) ? data : []);
@@ -118,13 +131,11 @@ export const AdminDashboardPage = () => {
 
   /* ==================== DATA PROCESSING ==================== */
 
-  // KPIs
   const totalSolicitudes = solicitudes.length;
   const totalUsuarios = usuarios.length;
   const totalInstituciones = instituciones.length;
   const totalTiposDoc = tiposDocumento.length;
 
-  // Solicitudes por estado
   const estadoCount: Record<string, number> = {};
   solicitudes.forEach((s) => {
     const estado = s.Estado || "PENDIENTE";
@@ -146,7 +157,6 @@ export const AdminDashboardPage = () => {
     color: PIE_COLORS[name] || "#94a3b8",
   }));
 
-  // Solicitudes por día (últimos 14 días)
   const last14Days: { label: string; date: string; solicitudes: number }[] = [];
   const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
@@ -173,7 +183,6 @@ export const AdminDashboardPage = () => {
     }
   });
 
-  // Solicitudes por institución (data comes from tipoDocumento.institucion)
   const instCount: Record<string, number> = {};
   solicitudes.forEach((s) => {
     const instName =
@@ -189,18 +198,22 @@ export const AdminDashboardPage = () => {
     .slice(0, 6)
     .map(([name, count]) => ({ institucion: name, solicitudes: count }));
 
-  // Usuarios recientes
   const recentUsers = [...usuarios]
-    .filter((u) => u.createdAt || u.Fecha_Creacion)
-    .sort((a, b) => {
-      const da = new Date(a.createdAt || a.Fecha_Creacion).getTime();
-      const db = new Date(b.createdAt || b.Fecha_Creacion).getTime();
-      return db - da;
-    })
-    .slice(0, 5);
-
-  /* ==================== CUSTOM TOOLTIP ==================== */
-
+  .map((u) => ({
+    ...u,
+    createdAt:
+      u.createdAt ||
+      u.Fecha_Creacion ||
+      u.Fecha_Registro ||
+      new Date().toISOString(), // 🔥 fallback
+  }))
+  .sort((a, b) => {
+    const da = new Date(a.createdAt).getTime();
+    const db = new Date(b.createdAt).getTime();
+    return db - da;
+  })
+  .slice(0, 5);
+  
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -408,10 +421,14 @@ export const AdminDashboardPage = () => {
                         ))}
                       </Pie>
                       <Tooltip
-                        formatter={(value: number, name: string) => [
-                          `${value} solicitud${value !== 1 ? "es" : ""}`,
-                          name,
-                        ]}
+                        formatter={(value, name) => {
+                          const safeValue = Number(value) || 0;
+
+                          return [
+                            `${safeValue} solicitud${safeValue === 1 ? "" : "es"}`,
+                            name,
+                          ];
+                        }}
                       />
                       <Legend
                         wrapperStyle={{ fontSize: "11px" }}
@@ -439,12 +456,6 @@ export const AdminDashboardPage = () => {
         <div className="bg-white rounded-2xl shadow-sm border p-6">
           <div className="flex justify-between items-center mb-5">
             <h2 className="font-semibold text-gray-800">Últimos usuarios registrados</h2>
-            <button
-              onClick={() => navigate("/admin/usuarios")}
-              className="text-xs text-blue-600 hover:underline font-medium"
-            >
-              Ver todos →
-            </button>
           </div>
 
           {recentUsers.length > 0 ? (

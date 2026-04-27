@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { User, ChevronDown, ArrowLeft, Shield } from "lucide-react";
+import { ChevronDown, ArrowLeft, Shield } from "lucide-react";
 import logo from "../../assets/GobDocsLogo.png";
 
 interface AdminLayoutProps {
@@ -50,12 +50,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0
                 transition-all duration-300 z-50">
                 <div className="bg-white rounded-xl shadow-xl py-2 border border-gray-100">
-                  <Link
-                    to="/admin/usuarios"
-                    className="block px-6 py-3 text-sm text-[#1a2b5e] hover:bg-blue-50"
-                  >
-                    Usuarios
-                  </Link>
+
+                  {/* ❌ USUARIOS ELIMINADO */}
+
                   <Link
                     to="/admin/instituciones"
                     className="block px-6 py-3 text-sm text-[#1a2b5e] hover:bg-blue-50"
@@ -80,7 +77,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                   >
                     Asignar tarifas
                   </Link>
+
                   <div className="border-t my-1"></div>
+
                   <Link
                     to="/admin/carga-masiva"
                     className="block px-6 py-3 text-sm text-[#1a2b5e] hover:bg-blue-50"
@@ -91,13 +90,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               </div>
             </div>
 
-            {/* REPORTES */}
-            <Link
-              to="/admin/reportes"
-              className="hidden md:flex items-center gap-1 hover:text-blue-200 transition-colors"
-            >
-              <span className="font-medium">Reportes</span>
-            </Link>
+            {/* ❌ REPORTES ELIMINADO */}
 
             {/* USER */}
             <div className="relative group pl-4 border-l border-white/20 ml-4">
@@ -135,9 +128,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         {showBackButton && (
           <button
             onClick={() => navigate(-1)}
-            className="absolute left-40 top-2 z-20 flex items-center gap-2 text-white hover:text-gray-400 transition-colors"
+            className="absolute left-4 md:left-10 top-6 z-20 flex items-center gap-2 text-white bg-black/40 hover:bg-black/60 px-4 py-2 rounded-full backdrop-blur-md transition-all shadow-md font-medium text-sm border border-white/10"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
             <span>Volver</span>
           </button>
         )}

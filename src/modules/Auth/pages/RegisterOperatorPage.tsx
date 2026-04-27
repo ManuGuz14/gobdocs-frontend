@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { formatCedula } from '../../../shared/utils/formatCedula';
 
 // Importamos el AuthLayout, las imágenes y tus componentes de UI
 import { AuthLayout } from '../../../shared/layouts/AuthLayout';
@@ -27,9 +28,10 @@ export const RegisterOperadorPage = () => {
   const API_URL = import.meta.env.VITE_REACT_APP_BACKEND || 'https://gobdocs-backend.up.railway.app';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: name === 'cedula' ? formatCedula(value) : value
     });
   };
 
@@ -163,6 +165,7 @@ export const RegisterOperadorPage = () => {
             name="cedula"
             placeholder="402-0880120-5"
             type="text"
+            maxLength={13}
             value={formData.cedula}
             onChange={handleChange}
           />

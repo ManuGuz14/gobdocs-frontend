@@ -170,7 +170,7 @@ export const SolicitudDetailPage = () => {
                   </div>
 
                   <a
-                    href={`${import.meta.env.VITE_REACT_APP_BACKEND}/${doc.Url_Archivo}`}
+                    href={doc.Url_Archivo}
                     target="_blank"
                     className="px-4 py-2 text-sm bg-gobdocs-primary text-white rounded-lg hover:opacity-90"
                   >
