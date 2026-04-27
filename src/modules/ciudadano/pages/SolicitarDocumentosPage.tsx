@@ -15,6 +15,8 @@ import Cedulaimage from "../../../assets/Docs/Cedulaimage.png";
 import Actadenac from "../../../assets/Docs/Actadenac.png";
 import Licencia from "../../../assets/Docs/licenciadconducir.png";
 import BuenaConducta from "../../../assets/Docs/buenaconducta.jpg";
+import PermisoAprendizaje from "../../../assets/Docs/permiso de aprendizaje.jpeg";
+import PermisoConstuccion from "../../../assets/Docs/permiso de construccion.jpg";
 
 export const SolicitarDocumentosPage = () => {
   const navigate = useNavigate();
@@ -53,6 +55,12 @@ export const SolicitarDocumentosPage = () => {
 
     if (name.includes("certificado de no antecedentes penales"))
       return BuenaConducta;
+
+    if (name.includes("permiso de aprendizaje"))
+      return PermisoAprendizaje;
+
+    if (name.includes("permiso de construcción"))
+      return PermisoConstuccion;
 
     return null;
   };
