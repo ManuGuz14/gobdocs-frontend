@@ -25,6 +25,8 @@ import { BulkUploadPage } from '../modules/Admin/pages/BulkUploadPage';
 import { CreateInstitucionPage } from '../modules/Admin/pages/CreateInstitucionPage';
 import { CreateDocumentTypePage } from '../modules/Admin/pages/CreateDocumentTypePage';
 import { AsignarTarifasPage } from '../modules/Admin/pages/AsignarTarifasPage';
+import { AdminRegisterFormPage } from '../modules/Admin/pages/AdminRegisterFormPage';
+import { AdminRegisterPage } from '../modules/Admin/pages/AdminRegisterPage';
 import { FormulariosPage } from '../modules/Admin/pages/Formularios/FormulariosPage.tsx';
 import { CreateFormularioPage } from '../modules/Admin/pages/Formularios/CreateFormulariosPage.tsx';
 import { EditFormularioPage } from '../modules/Admin/pages/Formularios/EditFormularioPage.tsx';
@@ -72,6 +74,8 @@ export const AppRouter = () => {
         <Route path="/admin/instituciones" element={<CreateInstitucionPage />} />
         <Route path="/admin/tipos-documento" element={<CreateDocumentTypePage />} />
         <Route path="/admin/tarifas" element={<AsignarTarifasPage />} />
+        <Route path="/admin/adminregisterform" element={<AdminRegisterFormPage />} />
+        <Route path="/admin/adminregister" element={<AdminRegisterPage />} />
 
         <Route path="/admin/formularios" element={<FormulariosPage />} />
         <Route path="/admin/formularios/create" element={<CreateFormularioPage />} />
