@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { formatCedula } from '../../../shared/utils/formatCedula';
 import { AuthLayout } from '../../../shared/layouts/AuthLayout';
@@ -10,12 +10,14 @@ import { Button } from '../../../shared/ui/Button';
 
 export const AdminRegisterPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const emailFromUrl = searchParams.get('email') || '';
 
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
     cedula: '',
-    email: '',
+    email: emailFromUrl,
     password: '',
     confirmPassword: '',
     institucionId: ''
@@ -154,6 +156,8 @@ export const AdminRegisterPage = () => {
           type="email"
           value={formData.email}
           onChange={handleChange}
+          readOnly={!!emailFromUrl}
+          style={emailFromUrl ? { backgroundColor: '#f1f5f9', cursor: 'not-allowed' } : {}}
         />
 
         <Input
